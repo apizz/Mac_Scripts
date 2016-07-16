@@ -2,7 +2,7 @@ Purpose
 
 Unlike Windows computers, Macs don't have any built-in computer authentication to allow them to connect to Wifi networks without requiring a user to login.
 
-This script is to be used with a locally-installed mobile configuration profile in environments with Active Directory.  The config profile must have TESTUSER & TESTPASS for the Wifi profile username & pass in order to substitute the generated AD info.  
+This script is to be used with a locally-installed mobile configuration profile in environments with Active Directory in order to get a machine online prior to user login.  The config profile must have TESTUSER & TESTPASS for the Wifi profile username & pass in order to substitute the generated AD info.  
 
 Support
 

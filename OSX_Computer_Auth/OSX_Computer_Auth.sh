@@ -11,12 +11,12 @@
 #
 # put the host name in 'host/computername.domain.com' format
 ##
-# Originally by Dan Pereira ~2012
+# Originally by DP ~2012
 # added traps and host name modification
 # thp 7/16/14
 #####
-DOMAIN="themastersschool.com"
-PASS=`sudo /usr/bin/security find-generic-password -s "/Active Directory/MASTERS" -w /Library/Keychains/System.keychain`
+DOMAIN="mydomain.com"
+PASS=`sudo /usr/bin/security find-generic-password -s "/Active Directory/XXXXXX" -w /Library/Keychains/System.keychain`
 USER=`/usr/sbin/dsconfigad -show | awk '/Computer *Account/ { print $4 }'`
 
 # trap '\' and escape them

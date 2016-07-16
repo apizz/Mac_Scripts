@@ -34,8 +34,8 @@ USER=`echo $USER | tr -d '$'`
 USER="host\/${USER}.${DOMAIN}"
 
 # change template file
-PROPATH='/Library/Scripts/Profiles'
-PROFILE='faculty_machine_profile.mobileconfig'
+PROPATH='/path/to/profile/directory'
+PROFILE='PROFILENAME.mobileconfig'
 
 sed -i .bak 's/TESTPASS/'${PASS}'/' ${PROPATH}/${PROFILE}
 sed -i .bak 's/TESTUSER/'${USER}'/' ${PROPATH}/${PROFILE}

@@ -6,7 +6,7 @@ This script is to be used with a locally-installed mobile configuration profile 
 
 Support
 
-I am not the original author of this script, but it was developed at my institution.  I can provide what help I can provide if you have issues.
+I am not the original author of this script, but it was developed at my institution.  I can provide what help I can if you have issues.
 
 Script Failures
 

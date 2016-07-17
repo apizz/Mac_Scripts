@@ -26,7 +26,7 @@ if [ $? = 0 ]; then
     fi
         
 else
-    echo "Maya 2016 Install: Failed."
+    /bi/echo "Maya 2016 Install: Failed."
 fi
 
 /bin/echo "DONE"

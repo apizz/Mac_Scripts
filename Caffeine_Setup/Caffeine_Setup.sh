@@ -1,7 +1,7 @@
 #!/bin/bash
 USER=$(/bin/ls -l /dev/console | /usr/bin/awk '{print $3}')
 CAFFPREF="/Users/$USER/Library/Preferences/com.lightheadsw.caffeine.plist"
-LOG="/Library/Logs/TMSTech/CaffeineSetup.log"
+LOG="/path/to/CaffeineSetup.log"
 
 writelog() {
 	echo "${1}" "${2}" "${3}" "${4}"

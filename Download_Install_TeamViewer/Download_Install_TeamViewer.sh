@@ -19,7 +19,7 @@ writelog() {
 ########################################################
 
 # Check for TeamViewer.log
-if [ -f "/Library/Logs/TMSTech/TeamViewerInstall.log" ]; then
+if [ -f $logfile ]; then
     writelog "CHECK: TeamViewerInstall.log Present."
 else
     /usr/bin/touch $logfile

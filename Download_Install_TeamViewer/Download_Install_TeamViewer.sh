@@ -3,7 +3,7 @@
 # Downloads TeamViewer 11 Host package, effectively going to get.teamviewer.com/yourcustomURL in a browser.
 # 
 # To get the full download link, enter your custom module link in a browser and right-click on link in the middle of
-# the window.  You will need this for the curl command to download the install PKG.
+# the window.  You will need this for the curl command to download the install PKG using this script.
 #
 
 ########################################################

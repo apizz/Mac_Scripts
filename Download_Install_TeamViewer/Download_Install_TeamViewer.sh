@@ -13,8 +13,8 @@ PKG="InstallTeamViewer-XXXXXXXXXX.pkg"
 
 # Create a function to echo output and write to a log file
 writelog() {
-	echo "${1}"	"${2}" "${3}" "${4}"
-	echo $(date) "${1}"	"${2}" "${3}" "${4}" >> $logfile
+	echo "${1}"
+	echo $(date) "${1}" >> $logfile
 }
 ########################################################
 

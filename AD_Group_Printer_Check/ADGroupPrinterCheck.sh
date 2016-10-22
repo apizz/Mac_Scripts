@@ -74,7 +74,7 @@ if [ "$ADGROUP_ONE_CHK" = "yes" ] || [ "$ADGROUP_TWO_CHK" = "yes" ] || [ "$ADGRO
 		writelog "Add $USER to _lpadmin Group: Failed."
 	fi
 else
-	writelog "$USER is not an Administrator or Faculty member. Exiting script."
+	writelog "$USER is not a member of required AD Groups to add printers. Exiting script."
 fi
 
 exit

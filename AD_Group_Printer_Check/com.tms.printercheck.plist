@@ -7,7 +7,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>sh</string>
-        <string>/Library/Scripts/TMS_Script_Resources/ADGroupPrinterCheck.sh</string>
+        <string>/Library/Scripts/ADGroupPrinterCheck.sh</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

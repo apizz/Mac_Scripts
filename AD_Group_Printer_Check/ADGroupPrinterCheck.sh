@@ -2,20 +2,23 @@
 
 #
 # Script depends on 2 things:
-# 1) Being connected to Masters - on campus, or off via Pulse
+# 1) Being connected to institution's network
 # 2) Script being run as root
 #
 # Created by AP Orlebeke - 10/18/16
 #
 ############### Initial Variables
 DSEDITGROUP="/usr/sbin/dseditgroup"
-ADMIN="adminsec"
-MSFAC="msfacsec"
-USFAC="usfacsec"
+# Local admin user account
 LADMIN="admin"
 LPADMIN="_lpadmin"
 USER=`/bin/ls -l /dev/console | /usr/bin/awk '{print $3}'`
-LOG="/Library/Logs/TMSTech/ADGroupPrinterCheck.log"
+LOG="/Library/Logs/ADGroupPrinterCheck.log"
+
+# Insert additional variables for AD Group checks
+ADGROUP_ONE=""
+ADGROUP_TWO=""
+ADGROUP_THREE=""
 ################
 
 writelog () {
@@ -53,13 +56,13 @@ if [ "$LADMIN_CHK" = "yes" ]; then
 	exit
 fi
 
-# dseditgroup administrator & faculty group membership checks
-ADMIN_CHK=`$DSEDITGROUP -o checkmember -m "$USER" "$ADMIN" | /usr/bin/awk '{print $1}'`
-MSFAC_CHK=`$DSEDITGROUP -o checkmember -m "$USER" "$MSFAC" | /usr/bin/awk '{print $1}'`
-USFAC_CHK=`$DSEDITGROUP -o checkmember -m "$USER" "$USFAC" | /usr/bin/awk '{print $1}'`
+# dseditgroup AD group membership checks
+ADGROUP_ONE_CHK=`$DSEDITGROUP -o checkmember -m "$USER" "$ADGROUP_ONE" | /usr/bin/awk '{print $1}'`
+ADGROUP_TWO_CHK=`$DSEDITGROUP -o checkmember -m "$USER" "$ADGROUP_TWO" | /usr/bin/awk '{print $1}'`
+ADGROUP_THREE_CHK=`$DSEDITGROUP -o checkmember -m "$USER" "$ADGROUP_THREE" | /usr/bin/awk '{print $1}'`
 
-# If user is a member of adminsec, msfacsec, or usfacsec, will add to _lpadmin group	
-if [ "$ADMIN_CHK" = "yes" ] || [ "$MSFAC_CHK" = "yes" ] || [ "$USFAC_CHK" = "yes" ]; then
+# If user is a member of any of the above security groups, will add to _lpadmin group	
+if [ "$ADGROUP_ONE_CHK" = "yes" ] || [ "$ADGROUP_TWO_CHK" = "yes" ] || [ "$ADGROUP_THREE_CHK" = "yes" ]; then
 	writelog "Adding $USER to _lpadmin Group ..."
 	
 	# Adds user to _lpadmin group to be able to add printers as a non-admin

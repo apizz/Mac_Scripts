@@ -12,9 +12,9 @@ downloaddir="/Users/Shared"
 PKG="InstallTeamViewer-XXXXXXXXXX.pkg"
 
 # Create a function to echo output and write to a log file
-writelog() {
-	echo "${1}"
-	echo $(date) "${1}" >> $logfile
+writelog () {
+	/bin/echo "${1}"
+	/bin/echo $(date) "${1}" >> $logfile
 }
 ########################################################
 
@@ -35,7 +35,7 @@ fi
 writelog "------- START -------"
 
 # Set download directory to working directory.
-cd "$downloaddir"
+/usr/bin/cd "$downloaddir"
 
 if [ "$(pwd)" = "$downloaddir" ]; then
     writelog "Working Directory Set to Download Directory: Successful."
@@ -72,8 +72,9 @@ if [ -f "$downloaddir/$PKG" ]; then
         fi
         
         writelog "Launching TeamViewer for the first time ..."
-        # If using TeamViewer Host, put TeamViewerHost in double quotes.
-        open -a "TeamViewer"
+        # If using TeamViewer Host, put TeamViewerHost in double quotes. This will launch TeamViewer and
+	# and display the unattended password screen.
+        /usr/bin/open -a "TeamViewer"
 
         writelog "Script Complete: TeamViewer Installed!"
     else

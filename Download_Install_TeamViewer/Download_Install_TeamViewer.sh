@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# Downloads TeamViewer 11 Host package, effectively going to get.teamviewer.com/yourcustomURL in a browser.
+# Downloads TeamViewer 10/11 Host module package, effectively going to get.teamviewer.com/yourcustomURL in a browser.
+#
+# Script has been tested successfully with versions 10 & 11.  Needs testing on version 12.
 # 
-# To get the full download link, enter your custom module link in a browser and right-click on link in the middle of
+# To get the full module download link, enter your custom module link in a browser and right-click on link in the middle of
 # the window.  You will need this for the curl command to download the install PKG using this script.
 #
 

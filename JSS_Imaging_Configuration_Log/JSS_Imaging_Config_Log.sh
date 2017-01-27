@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#########################################
 # Created by AP Orlebeke - 01/27/17
 # 
 # Script designed to be used in Casper Imaging workflow, or as a part of a separate policy
@@ -18,6 +19,8 @@
 #
 # (Optional) Use with a JSS extension attribute and tail the last line of the file
 # to read it.  You can find this EA here: 
+# https://github.com/apizz/JSS_Extension_Attributes/blob/master/JSS_Imaging_Configuration_EA/JSS_Imaging_Config_EA.sh
+#########################################
 
 # Imaging Configuration Name
 IMG_CFG="ENTER IMAGING CONFIGURATION NAME HERE"

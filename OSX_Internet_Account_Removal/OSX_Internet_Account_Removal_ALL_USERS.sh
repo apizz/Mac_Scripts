@@ -8,9 +8,9 @@ do
 		/usr/bin/sqlite3 "$USER"/"$DB" 'DELETE FROM ZACCOUNT'
 		
 		if [ $? = 0 ]; then
-    		/bin/echo "Successfully removed all Internet Accounts for $(basename $USER) from sqlite db!"
+    			/bin/echo "Successfully removed all Internet Accounts for $(basename $USER) from sqlite db!"
 		else
-    		/bin/echo "Failed to remove all Internet Accounts for $(basename $USER) from sqlite db."
+    			/bin/echo "Failed to remove all Internet Accounts for $(basename $USER) from sqlite db."
 		fi
 	fi
 done

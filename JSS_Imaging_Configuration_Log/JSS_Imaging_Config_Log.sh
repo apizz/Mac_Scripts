@@ -26,19 +26,14 @@
 IMG_CFG="ENTER IMAGING CONFIGURATION NAME HERE"
 
 # Date & Time Stamp
-DATE=$(date "+%Y-%m-%d %H:%M %p")
+DATE=$(date "+%Y-%m-%d %H:%M:%S")
 
-# Path to Log File for use with Casper Imaging workflow
-LOG="$1/var/log/imagingconfig.log"
+# Path to jamf.log for workflow
+LOG="$1/var/log/jamf.log"
 # Path to Log File for use with a policy
-# LOG="/var/log/imagingconfig.log"
-
-# Creates log file if it does not already exist
-if [ ! -f "$LOG" ]; then
-    /usr/bin/touch "$LOG"
-fi
+# LOG="/var/log/jamf.log"
 
 # Appends Date & Time Stamp along with config name to log file
-/bin/echo "$DATE $IMG_CFG" >> "$LOG"
+/bin/echo "$DATE IMAGINGCONFIG $IMG_CFG" >> "$LOG"
 
 exit

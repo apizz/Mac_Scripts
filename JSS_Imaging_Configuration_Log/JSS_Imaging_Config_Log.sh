@@ -28,7 +28,7 @@ IMG_CFG="ENTER IMAGING CONFIGURATION NAME HERE"
 # Date & Time Stamp
 DATE=$(date "+%Y-%m-%d %H:%M:%S")
 
-# Path to jamf.log for workflow
+# Path to jamf.log for imaging workflow
 LOG="$1/var/log/jamf.log"
 # Path to Log File for use with a policy
 # LOG="/var/log/jamf.log"

@@ -10,7 +10,7 @@
 # configuration used on a machine. The result is this script, which must be assigned
 # to each individual imaging configuration (or policy). 
 #
-# Writes the desired imaging configuration name to a log file in /var/log
+# Writes the desired imaging configuration name to /var/log/jamf.log
 # along with a date & time stamp. Subsequent imaging will append (not replace) this file.
 #
 # NOTE: Because of how scripts are treated in Casper Imaging vs. in policies, there are

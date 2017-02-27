@@ -3,6 +3,8 @@
 #
 # Runs a diskutil verifyDisk and writes output of results to a log and a Pass / Fail to PLIST
 #
+# For - do loop checks the disk integrity of all internal disks, in the event of Fusion Drive or otherwise.
+#
 # Paired with EA to read the result of the disk verification.
 #
 

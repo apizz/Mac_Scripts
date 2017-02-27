@@ -1,5 +1,11 @@
 #!/bin/sh
 
+#
+# Runs a diskutil verifyDisk and writes output of results to a log and a Pass / Fail to PLIST
+#
+# Paired with EA to read the result of the disk verification.
+#
+
 PLIST="/Library/Receipts/JSSData.plist"
 LOG="/Library/Logs/DiskVerify.log"
 P_KEY="diskVerify"

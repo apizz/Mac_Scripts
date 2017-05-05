@@ -27,7 +27,7 @@ Written (poorly) in bash.
 ### What the script does:
 
 1. Presents a dialog box for you to navigate to a folder containing all your dockutil scripts. All the steps completed will be written to a log file in this location (0_PKG_Build.log).
-2. Once a folder is selected, lists all scripts (looks for .sh file extensions) and looks for a PKG_BUILD_PREF variable in each script to determine what outset directory structure to make for packaging
+2. Once a folder is selected, lists all scripts (based on the file extension you specify in SCRIPT_FILE_EXT) and looks for a PKG_BUILD_PREF variable in each script to determine what outset directory structure to make for packaging
 3. Creates the outset directory structure and copies the script to it
 4. Creates a PKG
 5. If the PKG is created succesfully, cleans up the created directories used to create the PKG.

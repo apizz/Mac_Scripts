@@ -16,7 +16,8 @@
 # thp 7/16/14
 #####
 DOMAIN="mydomain.com"
-PASS=`sudo /usr/bin/security find-generic-password -s "/Active Directory/XXXXXX" -w /Library/Keychains/System.keychain`
+FOREST="MYFOREST"
+PASS=`sudo /usr/bin/security find-generic-password -s "/Active Directory/${FOREST}" -w /Library/Keychains/System.keychain`
 USER=`/usr/sbin/dsconfigad -show | awk '/Computer *Account/ { print $4 }'`
 
 # trap '\' and escape them
@@ -39,8 +40,15 @@ PROFILE='PROFILENAME.mobileconfig'
 
 sed -i .bak 's/TESTPASS/'${PASS}'/' ${PROPATH}/${PROFILE}
 sed -i .bak 's/TESTUSER/'${USER}'/' ${PROPATH}/${PROFILE}
+
 /usr/bin/profiles -I -F ${PROPATH}/${PROFILE}
+RESULT=`echo $?`
+
 rm -f ${PROPATH}/${PROFILE}.bak
 
+# If profile successfully installed, delete it
+if [ "$RESULT" = 0 ]; then
+  rm -rf ${PROPATH}/${PROFILE}
+fi
 
 exit

@@ -22,11 +22,11 @@ Written (poorly) in bash.
 - login-priv-every
 - on-demand
 
-ex. PKG_BUILD_PREF=login-once
+*ex. PKG_BUILD_PREF=login-once*
 
 ### What the script does:
 
-1. Presents a dialog box for you to navigate to folder containing all your dockutil scripts. All the steps completed will be written to a log file in this location.
+1. Presents a dialog box for you to navigate to a folder containing all your dockutil scripts. All the steps completed will be written to a log file in this location.
 2. Once a folder is selected, lists all scripts (looks for .sh file extensions) and looks for a PKG_BUILD_PREF variable in each script to determine what outset directory structure to make for packaging
 3. Creates the outset directory structure and copies the script to it
 4. Creates a PKG

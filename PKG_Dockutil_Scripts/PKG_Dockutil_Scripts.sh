@@ -36,14 +36,17 @@
 #
 #####################################################
 
-# Present dialog window and prompt user to navigate to folder with contained dockutil scripts
+# Present dialog window and prompt user to navigate to a folder with contained dockutil scripts
 REPO_DIR=$(osascript -e 'try
 tell application "SystemUIServer"
    choose folder with prompt "Where are your dockutil scripts?"
   set folderPath to POSIX path of result
 end
 end')
-SCRIPT_LIST=$(ls -1 "$REPO_DIR" | grep .sh)
+# For specifiying the file extension of your dockutil scripts
+SCRIPT_FILE_EXT=".sh"
+SCRIPT_LIST=$(ls -1 "$REPO_DIR" | grep $SCRIPT_FILE_EXT)
+# By default creates log file in previously selected folder
 LOG="${REPO_DIR}/0_PKG_Build.log"
 
 ############ OUTSET DIRECTORY STRUCTURE TEMPLATES ############

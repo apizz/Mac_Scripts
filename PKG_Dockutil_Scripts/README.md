@@ -31,4 +31,4 @@ Written (poorly) in bash.
 3. Creates the outset directory structure and copies the script to it
 4. Creates a PKG
 5. If the PKG is created succesfully, cleans up the created directories used to create the PKG.
-6. Repeats steps 3 - 5 for all remaining scripts.
+6. Repeats steps 3 - 5 for all remaining dockutil scripts.

@@ -1,10 +1,16 @@
 #!/bin/bash
 
-DB="Library/Accounts/Accounts3.sqlite"
+osvers=$(sw_vers -productVersion | awk -F. '{print $2}')
 
-for USER in /Users/*
+if [ "$osvers" = "11" ]; then
+	DB="Library/Accounts/Accounts3.sqlite"
+elif [ "$osvers" = "12" ]; then
+	DB="Library/Accounts/Accounts4.sqlite"
+fi
+
+for USER in /Users/* ;
 do
-	if [ -f "$USER/Library/Accounts/Accounts3.sqlite" ]; then
+	if [ -f "$USER/${DB}" ]; then
 		/usr/bin/sqlite3 "$USER"/"$DB" 'DELETE FROM ZACCOUNT'
 		
 		if [ $? = 0 ]; then

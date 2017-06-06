@@ -24,6 +24,10 @@ Written (poorly) in bash.
 
 *ex. PKG_BUILD_PREF=login-once*
 
+3. Enter the file extension of your dockutil scripts in the SCRIPT_FILE_EXT variable
+
+*ex. SCRIPT_FILE_EXT=".py"*
+
 ### What the script does:
 
 1. Presents a dialog box for you to navigate to a folder containing all your dockutil scripts. All the steps completed will be written to a log file in this location (0_PKG_Build.log).

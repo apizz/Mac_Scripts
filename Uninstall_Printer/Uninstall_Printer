@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#######
+# Use $4 for use with Jamf Pro as part of a policy for swapping older printer
+# models with a newer printer with the same name.
+#
+# See blog post below for more details:
+# 
+# 
+#######
+
+PRINTER=$4
+
+/usr/sbin/lpadmin -x "$PRINTER"
+exitcode=$(/bin/echo $?)
+
+if [ "$exitcode" = 0 ]; then
+    /bin/echo "${PRINTER} Printer Uninstall: Successful!"
+else
+    /bin/echo "${PRINTER} Printer Uninstall: Failed."
+fi
+
+exit $exitcode

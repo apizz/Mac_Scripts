@@ -5,3 +5,4 @@ While the unmap feature within Jamf Pro policies' Printer payload is very useful
 As such, I use this script as part of a Jamf Pro policy to uninstall the old printer first and then install the new printer with the normal Printer payload.
 
 More details on how this script is used as part of my larger printer swap workflow can be found below:
+https://aporlebeke.wordpress.com/2017/12/27/replacing-deployed-printers-with-the-same-name-in-jamf-pro/

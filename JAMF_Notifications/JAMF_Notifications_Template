@@ -1,0 +1,13 @@
+#!/bin/bash
+
+JAMF_HELPER="/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper"
+window="utility"
+title="NOTIFICATION TITLE"
+heading="NOTIFICATION MESSAGE HEADER"
+icon="/path/to/PNG_image.png"
+buttonone="BUTTON 1 TEXT"
+buttontwo="BUTTON 2 TEXT"
+defaultbutton="DEFAULT BUTTON NUMBER"
+message="NOTIFICATION MESSAGE"
+
+"$JAMF_HELPER" -windowType "$window" -title "$title" -heading "$heading" -description "$message" -icon "$icon" -button1 "$buttonone" -button2 -defaultButton "$defaultbutton" -timeout 300

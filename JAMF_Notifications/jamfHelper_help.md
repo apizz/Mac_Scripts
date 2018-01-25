@@ -23,7 +23,7 @@ Usage: jamfHelper -windowType [-windowPostion] [-title] [-heading] [-description
 <code>-description</code> "string"
 	Sets the main contents of the window to the specified string
 
-<code>-icon<c/ode> path
+<code>-icon</code> path
 	Sets the windows image filed to the image located at the specified path
 
 <code>-button1</code> "string"

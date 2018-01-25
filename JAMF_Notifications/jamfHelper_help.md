@@ -72,13 +72,23 @@ Usage: jamfHelper -windowType [-windowPostion] [-title] [-heading] [-description
 
 
 Return Values: The JAMF Helper will print the following return values to stdout...
-	0 - Button 1 was clicked
-	1 - The Jamf Helper was unable to launch
-	2 - Button 2 was clicked
-	3 - Process was started as a launchd task
-	XX1 - Button 1 was clicked with a value of XX seconds selected in the drop-down
-	XX2 - Button 2 was clicked with a value of XX seconds selected in the drop-down
-	239 - The exit button was clicked
-	243 - The window timed-out with no buttons on the screen
-	250 - Bad "-windowType"
-	255 - No "-windowType"
+
+0 - Button 1 was clicked
+
+1 - The Jamf Helper was unable to launch
+
+2 - Button 2 was clicked
+
+3 - Process was started as a launchd task
+
+XX1 - Button 1 was clicked with a value of XX seconds selected in the drop-down
+
+XX2 - Button 2 was clicked with a value of XX seconds selected in the drop-down
+
+239 - The exit button was clicked
+
+243 - The window timed-out with no buttons on the screen
+
+250 - Bad "-windowType"
+
+255 - No "-windowType"

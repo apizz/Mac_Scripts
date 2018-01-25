@@ -6,7 +6,9 @@ title="NOTIFICATION TITLE"
 heading="NOTIFICATION MESSAGE HEADER"
 icon="/path/to/PNG_image.png"
 buttonone="BUTTON 1 TEXT"
+# Optional secondary button
 buttontwo="BUTTON 2 TEXT"
+# 1 or 2
 defaultbutton="DEFAULT BUTTON NUMBER"
 message="NOTIFICATION MESSAGE"
 

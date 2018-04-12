@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Downloads TeamViewer 10/11/12 Host module package, effectively going to get.teamviewer.com/yourcustomURL in a browser.
+# Downloads TeamViewer 10/11/12/13 Host module package, effectively going to get.teamviewer.com/yourcustomURL in a browser.
 #
-# Script has been tested successfully with versions 10, 11, & 12. Needs 13 testing.
+# Script has been tested successfully with versions 10, 11, 12, & 13
 # 
 # To get the full module download link, enter your custom module link in a browser and right-click on link in the middle of
 # the window.  You will need this for the curl command to download the install PKG using this script.
@@ -13,6 +13,8 @@
 logfile="/path/to/TeamViewerInstall.log"
 # Download location for TeamViewer module installer PKG
 downloaddir="/Users/Shared"
+# Leave as is to automatically open TeamViewer Host once installed
+APP="TeamViewerHost"
 # Name of TeamViewer module installer PKG
 PKG="InstallTeamViewer-XXXXXXXXXX.pkg"
 # In order to have your custom TeamViewer branding apply, the PKG variable MUST have the 10-digit 
@@ -26,7 +28,7 @@ URL='https://dl.tvcdn.de/download/version_1Xx/CustomDesign/Install....-XXXXXXXXX
 # Create a function to echo output and write to a log file
 writelog () {
 	/bin/echo "${1}"
-	/bin/echo $(date) "${1}" >> $logfile
+	/bin/echo $(/bin/date) "${1}" >> $logfile
 }
 ########################################################
 
@@ -47,39 +49,30 @@ fi
 
 writelog "------- START -------"
 
-# Set download directory to working directory.
-/usr/bin/cd "$downloaddir"
-
-if [ "$(pwd)" = "$downloaddir" ]; then
-    writelog "Working Directory Set to Download Directory: Successful."
-else
-    writelog "Working Directory Set to Download Directory: Failed."
-fi
-
 writelog "DOWNLOADING: TeamViewer Install PKG"
 
 # Download TeamViewer Custom module
-/usr/bin/curl "$URL" -o $PKG
+/usr/bin/curl "$URL" -o "${downloaddir}/${PKG}"
 
-if [ -f "$downloaddir/$PKG" ]; then
+if [ -f "${downloaddir}/${PKG}" ]; then
     # Installs package
     writelog "INSTALLING: TeamViewer module ..."
-    /usr/sbin/installer -pkg "$downloaddir/$PKG" -target /
+    /usr/sbin/installer -pkg "${downloaddir}/${PKG}" -target /
     if [ $? = 0 ]; then
-        writelog "TeamViewer Install: Successful."
+        writelog "TeamViewer Install: Successful!"
         # Deletes package after successful install
         writelog "DELETING: TeamViewer Host PKG ..."
-        sudo /bin/rm -rf "$downloaddir/$PKG"
+        sudo /bin/rm -rf "${downloaddir}/${PKG}"
 
         if [ ! -f "$downloaddir/$PKG" ]; then
-            writelog "TeamViewer Install PKG Deletion: Successful."
+            writelog "TeamViewer Install PKG Deletion: Successful!"
         else
             writelog "TeamViewer Install PKG Deletion: Failed."
         fi
         
         writelog "Launching TeamViewer for the first time ..."
 	# Open TeamViewer to get 
-        /usr/bin/open -a "TeamViewer"
+        /usr/bin/open -a "$APP"
 
         writelog "Script Complete: TeamViewer Installed!"
     else

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Downloads TeamViewer 10/11 Host module package, effectively going to get.teamviewer.com/yourcustomURL in a browser.
+# Downloads TeamViewer 10/11/12 Host module package, effectively going to get.teamviewer.com/yourcustomURL in a browser.
 #
-# Script has been tested successfully with versions 10 & 11.  Needs testing on version 12.
+# Script has been tested successfully with versions 10, 11, & 12. Needs 13 testing.
 # 
 # To get the full module download link, enter your custom module link in a browser and right-click on link in the middle of
 # the window.  You will need this for the curl command to download the install PKG using this script.
@@ -15,6 +15,13 @@ logfile="/path/to/TeamViewerInstall.log"
 downloaddir="/Users/Shared"
 # Name of TeamViewer module installer PKG
 PKG="InstallTeamViewer-XXXXXXXXXX.pkg"
+# In order to have your custom TeamViewer branding apply, the PKG variable MUST have the 10-digit 
+# branding ID in the PKG name. In my testing I've found this to be necessary.
+#
+# More info about getting this URL here: https://www.jamf.com/jamf-nation/discussions/10366/customizing-deploying-teamviewer#responseChild148891
+# Direct URL where X is the version - ex. /version_12x/
+# ex. https://dl.tvcdn.de/download/version_12x/CustomDesign/Install%20TeamViewerHost-aaa1aa1aa1.pkg
+URL='https://dl.tvcdn.de/download/version_1Xx/CustomDesign/Install....-XXXXXXXXXX.pkg'
 
 # Create a function to echo output and write to a log file
 writelog () {
@@ -51,15 +58,8 @@ fi
 
 writelog "DOWNLOADING: TeamViewer Install PKG"
 
-# Enter your full TeamViewer download link in the single quotes.
-# If you are on version 10 of TeamViewer, it will be ../version_10x/.. rather than version_11x
-#
-# ex. https://download.teamviewer.com/download/version_11x/CustomDesign/Install%20TeamViewerHost-XXXXXXXXXX.pkg
-#
-# In order to have your custom TeamViewer branding apply, the PKG variable MUST have the 10-digit 
-# branding ID in the PKG name. In my testing I've found this to be necessary.
-
-/usr/bin/curl 'https://download.teamviewer.com/download/version_1Xx/CustomDesign/Install....-XXXXXXXXXX.pkg' -o $PKG
+# Download TeamViewer Custom module
+/usr/bin/curl "$URL" -o $PKG
 
 if [ -f "$downloaddir/$PKG" ]; then
     # Installs package
@@ -78,8 +78,7 @@ if [ -f "$downloaddir/$PKG" ]; then
         fi
         
         writelog "Launching TeamViewer for the first time ..."
-        # If using TeamViewer Host, put TeamViewerHost in double quotes. This will launch TeamViewer and
-	# and display the unattended password screen for password entry.
+	# Open TeamViewer to get 
         /usr/bin/open -a "TeamViewer"
 
         writelog "Script Complete: TeamViewer Installed!"

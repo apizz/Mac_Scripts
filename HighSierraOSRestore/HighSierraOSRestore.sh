@@ -119,7 +119,7 @@ Optional Arguments:
   			the restore.
   --log-path, -l	Specify an alternate path than the default set in the script.
   --no-imagescan	For use with --dry-run, will not perform an asr imagescan on
-  			the applicable OS_IMAGE file"
+  			the applicable OS_IMAGE file."
 }
 
 function version() {
@@ -288,6 +288,7 @@ function os_image_restore() {
 			writelog "Dry-run: OS image restore"
 			if [ "$IMAGESCAN" = 0 ]; then
 				writelog "Dry-run: Will not perform asr imagescan ..."
+				exitcode=0
 			else		
 				writelog "Dry-run: Performing asr imagescan ..."
 				# Perform ASR imagescan
@@ -318,7 +319,7 @@ function os_image_restore() {
 			restore_end_time
 			echo "${TEXT_GREEN}${RESTORE_END}${TEXT_NORMAL}"
 		fi
-	else
+	elif [ "$DRY_RUN" != 1 ]
 		if [ "$exitcode" != 0 ]; then
 			echo "${TEXT_RED}Failed to Restore. Exiting ...${TEXT_NORMAL}"
 			errorcode=5

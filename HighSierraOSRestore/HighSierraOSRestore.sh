@@ -223,8 +223,7 @@ function jamf_log_copy() {
 
 	# If jamf.log file exists, copy it off before restoring
 	if [ -f "${EXT_VOLUME}${JAMFLOG}" ]; then
-		writelog "Found jamf.log on external machine."
-		writelog "Copying ..."
+		writelog "Found jamf.log on external machine. Copying ..."
 		# Dry-run
 		if [ "$DRY_RUN" = 1 ]; then
 			writelog "Dry-run: jamf.log copy"
@@ -292,8 +291,13 @@ function os_image_restore() {
 			writelog "Beginning erase & restore ..."
 			writelog "Restoring $OS_IMAGE ..."
 			# Restore
-			/usr/sbin/asr restore --source "${OS_IMAGE_PATH}/${OS_IMAGE}" --target /dev/${EXT_DISK_DEVICENODE} --erase --noprompt
-			exitcode=$(/bin/echo $?)
+			if [ "$FILESYSTEM" = "APFS" ]; then
+				/usr/sbin/asr restore --source "${OS_IMAGE_PATH}/${OS_IMAGE}" --target /dev/${EXT_DISK_DEVICEID} --erase --noprompt
+				exitcode=$(/bin/echo $?)
+			else
+				/usr/sbin/asr restore --source "${OS_IMAGE_PATH}/${OS_IMAGE}" --target /dev/${EXT_DISK_DEVICENODE} --erase --noprompt
+				exitcode=$(/bin/echo $?)
+			fi
 		fi
 	else
 		errorcode=4

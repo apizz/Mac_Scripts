@@ -472,7 +472,17 @@ while [ ${#} -gt 0 ]; do
     			writelog "You must specify a name for the machine - ex. ./${PROGRAM} -c <compname>"
 				errorcode=12
 				print_exitcode
+			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" = 1 ]; then
+				writelog "Error: No computer hostname provided."
+    			writelog "You must specify a name for the machine - ex. ./${PROGRAM} -c <compname>"
+				errorcode=12
+				print_exitcode
 			elif [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" != 1 ]; then
+				writelog "Error: While you have made setting a computer hostname not \
+				required, you have not provided a computer hostname"
+				errorcode=13
+				print_exitcode
+			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" != 1 ]; then
 				writelog "Error: While you have made setting a computer hostname not \
 				required, you have not provided a computer hostname"
 				errorcode=13

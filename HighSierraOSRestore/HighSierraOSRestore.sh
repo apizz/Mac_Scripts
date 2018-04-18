@@ -319,7 +319,7 @@ function os_image_restore() {
 			restore_end_time
 			echo "${TEXT_GREEN}${RESTORE_END}${TEXT_NORMAL}"
 		fi
-	elif [ "$DRY_RUN" != 1 ]
+	elif [ "$DRY_RUN" != 1 ]; then
 		if [ "$exitcode" != 0 ]; then
 			echo "${TEXT_RED}Failed to Restore. Exiting ...${TEXT_NORMAL}"
 			errorcode=5

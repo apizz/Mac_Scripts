@@ -207,13 +207,10 @@ function check_compname() {
 		if [ "$COMPNAME" != "" ]; then
 			writelog "Will set computer hostname to ${COMPNAME} ..."
 		else
-			writelog "No computer hostname found in ${COMPNAME_FILE}."
 			errorcode=1
 			print_exitcode
 		fi
 	else
-		writelog "Could not find ${COMPNAME_FILE} file on external machine."
-		writelog "Please specify a computer hostname with --compname / -c <compname>"
 		errorcode=2
 		print_exitcode
 	fi
@@ -243,8 +240,6 @@ function jamf_log_copy() {
 			fi
 		fi
 	else
-		writelog "jamf.log does not exist on target machine."
-		writelog "Please rerun script without --keepjamflog. Exiting ..."
 		errorcode=3
 		print_exitcode
 	fi
@@ -301,7 +296,6 @@ function os_image_restore() {
 			exitcode=$(/bin/echo $?)
 		fi
 	else
-		writelog "ERROR: Unsure what filesystem is to be configured. Exiting ..."
 		errorcode=4
 		print_exitcode
 	fi
@@ -309,7 +303,6 @@ function os_image_restore() {
 	# Error check
 	if [ "$DRY_RUN" = 1 ] && [ "$IMAGESCAN" != 0 ]; then
 		if [ "$exitcode" != 0 ]; then
-			writelog "Dry-run: OS imagescan failed on ${OS_IMAGE}"
 			errorcode=4
 			print_exitcode
 		else
@@ -390,13 +383,9 @@ function verify_os_images() {
 
 function verify_ext_disk() {
 	if [ "$EXT_DISK_DEVICEID" = "" ]; then
-		writelog "No external disk detected. Disconnect and reconnect the external computer."
-		writelog "Exiting ..."
 		errorcode=9
 		print_exitcode
 	elif [ ! -d "$EXT_VOLUME" ]; then
-		writelog "No mounted external disk volume detected. Disconnect and reconnect the external computer."
-		writelog "Exiting ..."
 		errorcode=10
 		print_exitcode
 	fi
@@ -427,7 +416,6 @@ function write_compname_txt() {
 	elif [ -f "${EXT_VOLUME}${COMPNAME_FILE}" ]; then
 		writelog "Successfully wrote ${COMPNAME_FILE}!"
 	else
-		writelog "No ${COMPNAME_FILE} file detected. File write failed. Exiting ..."
 		errorcode=11
 		print_exitcode
 	fi
@@ -466,23 +454,15 @@ while [ ${#} -gt 0 ]; do
     	--compname | -c)
     		COMPNAME="$2"
     		if [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" = 1 ]; then
-    			writelog "Error: No computer hostname provided."
-    			writelog "You must specify a name for the machine - ex. ./${PROGRAM} -c <compname>"
 				errorcode=13
 				print_exitcode
 			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" = 1 ]; then
-				writelog "Error: No computer hostname provided."
-    			writelog "You must specify a name for the machine - ex. ./${PROGRAM} -c <compname>"
 				errorcode=13
 				print_exitcode
 			elif [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" != 1 ]; then
-				writelog "Error: While you have made setting a computer hostname not \
-				required, you have not provided a computer hostname"
 				errorcode=14
 				print_exitcode
 			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" != 1 ]; then
-				writelog "Error: While you have made setting a computer hostname not \
-				required, you have not provided a computer hostname"
 				errorcode=14
 				print_exitcode
 			fi
@@ -492,11 +472,9 @@ while [ ${#} -gt 0 ]; do
       	--log-path | -l)
 			LOGPATH="$2"
 			if [ "$LOGPATH" = "" ] || [[ "$LOGPATH" == -* ]]; then
-				writelog "Error: no directory specified for --log-path"
 				errorcode=15
 				print_exitcode
 			elif [ ! -d "$LOGPATH" ]; then
-				writelog "Error: specified --log-path does not exist."
 				errorcode=16
 				print_exitcode
 			fi
@@ -515,7 +493,6 @@ while [ ${#} -gt 0 ]; do
 			writelog "Will use HFS image instead of APFS image ..."
 			;;
       	*)
-      		writelog "Unknown argument provided '${1}'"
       		errorcode=17
       		print_exitcode
       		;;

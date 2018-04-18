@@ -60,8 +60,7 @@ EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding erro
 "14: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to not required"
 "15: --log-path: No log path defined"
 "16: Specified --log-path directory does not exist"
-"17: No arguments passed to script"
-"18: Unknown argument passed to script")
+"17: Unknown argument passed to script")
 
 EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please use --compname / -c instead" #1
@@ -80,8 +79,7 @@ EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please either set REQUIRE_COMPNAME to 1 and provide a desired computer name, or remove your --compname argument" #14
 "Please specify a path to an existing directory" #15
 "Please specify a path to an existing directory" #16
-"Please provide an argument, or use --dry-run to test" #17
-"Please remove the unknown argument") #18
+"Please remove the unknown argument") #17
 
 ##### FUNCTIONS
 
@@ -470,22 +468,22 @@ while [ ${#} -gt 0 ]; do
     		if [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" = 1 ]; then
     			writelog "Error: No computer hostname provided."
     			writelog "You must specify a name for the machine - ex. ./${PROGRAM} -c <compname>"
-				errorcode=12
+				errorcode=13
 				print_exitcode
 			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" = 1 ]; then
 				writelog "Error: No computer hostname provided."
     			writelog "You must specify a name for the machine - ex. ./${PROGRAM} -c <compname>"
-				errorcode=12
+				errorcode=13
 				print_exitcode
 			elif [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" != 1 ]; then
 				writelog "Error: While you have made setting a computer hostname not \
 				required, you have not provided a computer hostname"
-				errorcode=13
+				errorcode=14
 				print_exitcode
 			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" != 1 ]; then
 				writelog "Error: While you have made setting a computer hostname not \
 				required, you have not provided a computer hostname"
-				errorcode=13
+				errorcode=14
 				print_exitcode
 			fi
     		writelog "Will set computer hostname to ${COMPNAME} ..."
@@ -495,11 +493,11 @@ while [ ${#} -gt 0 ]; do
 			LOGPATH="$2"
 			if [ "$LOGPATH" = "" ] || [[ "$LOGPATH" == -* ]]; then
 				writelog "Error: no directory specified for --log-path"
-				errorcode=14
+				errorcode=15
 				print_exitcode
 			elif [ ! -d "$LOGPATH" ]; then
 				writelog "Error: specified --log-path does not exist."
-				errorcode=15
+				errorcode=16
 				print_exitcode
 			fi
 			shift

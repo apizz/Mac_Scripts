@@ -26,6 +26,8 @@ or move from HFS to APFS (SSDs only) based on the drive storage media.
 
 - Use `--force-hfs` to prevent restoring an APFS OS image to an SSD.
 
+- Use `--no-imagescan` with `--dry-run` to skip the asr imagescan process
+
 - Use `--keepjamflog` to copy the jamf.log off a JAMF-managed machine prior to OS restore and copy it back afterward. Similar to what you may be used to with Jamf Imaging.
 
 - Use `--compname`Write a file with the desired computer hostname for collection & use later in your deployment workflow.
@@ -51,6 +53,9 @@ or move from HFS to APFS (SSDs only) based on the drive storage media.
 
 `sudo ./HighSierraOSRestore.sh [argument] --dry-run`
 - Runs script printing all output given supplied arguments, but does not complete a restore or write any files to the external machine. Will instead perform an imagescan on the OS_IMAGE file. Great for testing!
+
+`sudo ./HighSierraOSRestore.sh [argument] --dry-run --no-imagescan`
+- Same as above, but skips the asr imagescan.
 
 `sudo ./HighSierraOSRestore.sh --compname <compname>`
 - Following OS restore, writes file (COMPNAME_FILE) with the computer name

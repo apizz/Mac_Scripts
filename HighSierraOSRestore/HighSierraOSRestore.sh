@@ -97,7 +97,7 @@ function showhelp() {
 Arguments:
   --help, -h		Show this help message.
   --version, -v		Show version info.
-  --exitcodes, -e	Show the exitcode error list.
+  --exitcodes, -e	Show the exit code error list.
   --dry-run, -d		Run through script workflow to test output & results.
   --force-hfs, -f	For opting to use an HFS OS image over an APFS image on SSDs.
 
@@ -138,9 +138,9 @@ function exit_codes_help() {
 
 function print_exitcode() {
 	EXITRESULT=$(/usr/bin/printf '%s\n' "${EXITCODE_ARRAY[$errorcode]}")
-	EXITHELP=$(/usr/bin/printf '%s\n' "${EXITCODE_HELP_ARRAY[$errorcode]}")
+	#EXITHELP=$(/usr/bin/printf '%s\n' "${EXITCODE_HELP_ARRAY[$errorcode]}")
 	writelog "Error Code:  $EXITRESULT"
-	writelog "Recommendation:  $EXITHELP"
+	#writelog "Recommendation:  $EXITHELP"
 	exit $errorcode
 }
 

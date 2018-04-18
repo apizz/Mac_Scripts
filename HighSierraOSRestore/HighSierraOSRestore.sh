@@ -165,7 +165,7 @@ function assess_storage_type() {
 	else
 		SSD=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICEID} | /usr/bin/grep "SSD")
 		### NEED WORK HERE FOR DIFFERENTIATING HFS vs. APFS FORMATTED DRIVES ###
-		EXT_DISK_ID=$(/bin/ls -1 /dev | /usr/bin/grep "^${EXT_DISK_DEVICEID}" | /bin/tail -1)
+		EXT_DISK_ID=$(/bin/ls -1 /dev | /usr/bin/grep "^${EXT_DISK_DEVICEID}" | /usr/bin/tail -1)
 		EXT_DISK_FS=$(/usr/sbin/diskutil info ${EXT_DISK_ID} | /usr/bin/awk '/Type (Bundle)/{print $NF}')
 		if [ "$SSD" != "" ]; then
 			if [ "$FORCE_HFS" = 1 ]; then

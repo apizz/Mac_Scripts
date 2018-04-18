@@ -1,48 +1,15 @@
 #!/bin/bash
 
-####################
-# ABOUT THE SCRIPT
-# 
-# Restores never-booted High Sierra OS images to an external machine connected via Target Disk Mode,
-# automatically determining the optimal OS image filesystem based on the detected storage
-# media (SSD = APFS, HDD = HFS, Fusion Drive = HFS).
-#
-# Requirements & Assumptions:
-# 
-#   1) The external machine to be restored already has the same version of High Sierra installed
-#	   as the OS restore image.
-#	     * Apple's firmware updates come solely via the macOS installer app & macOS updates
-#
-#   2) You are using AutoDMG (https://github.com/MagerValp/AutoDMG) to build never-boot OS images.
-#
-#	3) You intend to either restore an OS image of the same filesystem (HFS > HFS; APFS > APFS)
-#	   or move from HFS to APFS (SSDs only) based on the drive storage media
-#	     * See https://blog.macsales.com/43043-using-apfs-on-hdds-and-why-you-might-not-want-to
-#
-#	4) 
-#
-# Additional (Optional) Capabilities
-#
-#	1) Copy the jamf.log off a JAMF-managed machine prior to OS restore and copy it back afterward.
-#		 * Similar to what you may have been used to with Jamf Imaging
-#
-#	2) Write a file with the desired computer hostname for collection & use later in your deployment
-#	   workflow.
-#
-#	3) If you've restored an OS image via this script previously and used --compname / -c to write
-#	   a file with your desired hostname, use this file instead of entering the same or different
-#	   hostname.
-#
-#	4) Write the OS image restore start and end timestamps for collection & use later in your
-#	   deployment workflow.
-#		 * For example, I like to know how long it takes to go from base Mac to fully deployed
-#
-#
-
 # Never-booted OS images
 OS_IMAGE_PATH="/Users/admin/Downloads"
 APFS_OS_IMAGE="osx_updated_180402-10.13.4-17E199.apfs.dmg"
 HFS_OS_IMAGE="osx_updated_180402-10.13.4-17E199.hfs.dmg"
+
+# Date & timestamp format for use with LOG
+# Format: YYMMDD
+LOGDATE=$(/bin/date "+%y%m%d")
+# Log folder
+LOGPATH="/Users/${USER}/Desktop/OS_RESTORE_LOGS"
 
 # Compname variables
 # Computer hostname required (true)
@@ -51,20 +18,6 @@ REQUIRE_COMPNAME=1
 #REQUIRE_COMPNAME=0
 # Path to write computer hostname file for later MDM collection
 COMPNAME_FILE="/Library/Receipts/CompName.txt"
-
-# Log & path based on computer name & date vs. date only to write output to
-DATE=$(/bin/date "+%y%m%d_%H%M%S")
-if [ "$REQUIRE_COMPNAME" = 1 ]; then
-	LOGPATH="/Users/${USER}/Desktop/OS_RESTORE_LOGS/${COMPNAME}"
-	LOG="${LOGPATH}/HighSierraOSRestore-${COMPNAME}-${DATE}.log"
-else
-	LOGPATH="/Users/${USER}/Desktop/OS_RESTORE_LOGS/"
-	LOG="${LOGPATH}/HighSierraOSRestore-${DATE}.log"
-fi
-
-# JAMF variables: for use with --keepjamflog / -k
-JAMFLOG="/var/log/jamf.log"
-TMP_JAMFLOG="${LOGPATH}/jamf.log"
 
 # Plist to write OS restore start and end timestamps to: for use with --timestamps / -t
 PLIST="/Library/Receipts/OSRestore.plist"
@@ -76,7 +29,8 @@ ROOT=$(/usr/bin/whoami)
 USER=$(/bin/ls -l /dev/console | /usr/bin/awk '{print $3}')
 
 # Program Info
-PROGRAM="HighSierraOSRestore.sh"
+NAME="HighSierraOSRestore"
+PROGRAM="${NAME}.sh"
 AUTHOR="AP Orlebeke"
 VERSION="1.0"
 GITHUB="https://github.com/apizz/Mac_Scripts/HighSierraOSRestore"
@@ -89,34 +43,78 @@ TEXT_GREEN='\033[32m'
 TEXT_YELLOW='\033[33m'
 TEXT_BLUE='\033[34m'
 
+EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding error code number
+"1: --reusecompname: No computer hostname found in ${COMPNAME_FILE}"
+"2: --reusecompname: No ${COMPNAME_FILE} found on external machine"
+"3: --keepjamflog: No jamf.log file found on external machine"
+"4: Filesystem unable to be determined on external machine"
+"5: Filesystem restore failed"
+"6: Script not run as 'root'"
+"7: --force-hfs: Specified HFS image at OS_IMAGE_PATH (${OS_IMAGE_PATH}) does not exist"
+"8: One or more missing OS image files from OS_IMAGE_PATH (${OS_IMAGE_PATH})"
+"9: No external machine connected"
+"10: No external machine volume mounted"
+"11: Failed to write ${COMPNAME_FILE} file with computer hostname"
+"12: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to required"
+"13: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to not required"
+"14: --log-path: No log path defined"
+"15: Specified --log-path directory does not exist"
+"16: No arguments passed to script"
+"17: Unknown argument passed to script")
+
+EXITCODE_HELP_ARRAY=("" # Dummy first line
+"Please use --compname / -c instead" #1
+"Please use --compname / -c instead" #2
+"Please run again without --keepjamflog" #3
+"None .... sorry  ¯\_(ツ)_/¯" #4
+"Please try again. If failures continue, you may have an issue with one of your OS image files" #5
+"Please run again with 'sudo'" #6
+"Verify your OS_IMAGE_PATH and HFS_OS_IMAGE variables are correct." #7
+"Verify your APFS_OS_IMAGE and HFS_OS_IMAGE variables are correct" #8
+"Please connect or reconnect your Target Disk Mode machine" #9
+"Please connect or reconnect your Target Disk Mode machine" # 10
+"Please try running again" #11
+"Please supply a computer hostname: ex. --compname <compname> OR make REQUIRE_COMPNAME set to 0" #12
+"Please either set REQUIRE_COMPNAME to 1 and provide a desired computer name, or remove your --compname argument" #13
+"Please specify a path to an existing directory" #14
+"Please specify a path to an existing directory" #15
+"Please provide an argument, or use --dry-run to test" #16
+"Please remove the unknown argument") #17
+
 ##### FUNCTIONS
 
 function writelog() {
-	/bin/echo "${1}"
-	/bin/echo $(/bin/date "+%Y-%m-%d %H:%M:%S") "${1}" >> "$LOG"
+	echo "${1}"
+	echo $(/bin/date "+%Y-%m-%d %H:%M:%S") "${1}" >> "$LOG"
 }
 
 function showhelp() {
-	/bin/echo "Usage:  sudo ./${PROGRAM} [-h] [-v] [-e] [--compname <compname>]
+	/bin/echo "Usage:  sudo ./${PROGRAM} [--help] [--version] [--exitcodes] 
+			[--dry-run] [--force-hfs] [--compname <compname>]
+			[--reusecompname] [--timestamps] [--keepjamflog]
+			[--log-path <pathtologfolder>]
 
 Arguments:
-  --help, -h			Show this help message.
-  --version, -v			Show version info.
-  --exitcodes, -e       Prints exitcode list.
+  --help, -h		Show this help message.
+  --version, -v		Show version info.
+  --exitcodes, -e	Show the exitcode list.
+  --dry-run, -d		Run through script workflow to test output & results.
+  --force-hfs, -f	For opting to use an HFS OS image over an APFS image on SSDs.
 
 
 
 Optional Arguments:
-  --dry-run, -d			Run through script workflow to test output & results.
-  --compname, -c		Provide computer hostname to for use as part of MDM enrollment
-  				and computer renaming.
-  --reusecompname		Will attempt to use previous compname at ${COMPNAME_FILE}.
-  --timestamps, -t		Write timestamps before and after OS image restore to external
-  				machine PLIST (${PLIST}) for use as part of enrollment or larger deployment
-  				calculation.
-  --keepjamflog, -k		Will copy the jamf log off the external machine (if it exists) to
-  				${LOGPATH} folder and copy it back after the restore.
-  --force-hfs, -f		For opting to use an HFS OS image over an APFS image on SSDs."
+  --compname, -c	Provide computer hostname for use as part of MDM enrollment
+  			and computer renaming.
+  --reusecompname	Will attempt to use previous compname at COMPNAME_FILE
+  			(${COMPNAME_FILE}), if it exists.
+  --timestamps, -t	Write timestamps before and after OS image restore to external
+  			machine PLIST (${PLIST}) for use as part
+  			of enrollment or larger deployment calculation.	
+  --keepjamflog, -k	Will copy the jamf log off the external machine (if it exists) to
+  			${LOGPATH} folder and copy it back after
+  			the restore.
+  --log-path, -l	Specify an alternate path than the default set in the script."
 }
 
 function version() {
@@ -126,20 +124,16 @@ function version() {
 }
 
 function exit_codes() {
-	/bin/echo "Exit Codes:
-	1: --reusecompname: No computer hostname found in ${COMPNAME_FILE}
-	2: --reusecompname: No ${COMPNAME_FILE} found on external machine
-	3: --keepjamflog: No jamf.log file found on external machine
-	4: Filesystem unable to be determined on external machine
-	5: Filesystem restore failed
-	6: Script not run as 'root'
-	7: One or more missing OS image files from ${OS_IMAGE_PATH}
-	8: No external machine connected
-	9: No external machine volume mounted
-	10: Failed to write ${COMPNAME_FILE} file with computer hostname
-	11: --compname / -c command supplied with no computer hostname defined; REQUIRE_COMPNAME set to required
-	12: --compname / -c command supplied with no computer hostname defined; REQUIRE_COMPNAME set to not required
-	13: Unkown command passed to script"
+	/bin/echo "Exit Codes:"
+	/usr/bin/printf '%s\n' "${EXITCODE_ARRAY[@]}"
+}
+
+function print_exitcode() {
+	EXITRESULT=$(/usr/bin/printf '%s\n' "${EXITCODE_ARRAY[$errorcode]}")
+	EXITHELP=$(/usr/bin/printf '%s\n' "${EXITCODE_HELP_ARRAY[$errorcode]}")
+	writelog "Error Code:  $EXITRESULT"
+	writelog "Recommendation:  $EXITHELP"
+	exit $errorcode
 }
 
 function apfs_mount_post_restore() {
@@ -203,16 +197,22 @@ function check_compname() {
 			writelog "Will set computer hostname to ${COMPNAME} ..."
 		else
 			writelog "No computer hostname found in ${COMPNAME_FILE}."
-			exit 1
+			errorcode=1
+			print_exitcode
 		fi
 	else
 		writelog "Could not find ${COMPNAME_FILE} file on external machine."
 		writelog "Please specify a computer hostname with --compname / -c <compname>"
-		exit 2
+		errorcode=2
+		print_exitcode
 	fi
 }
 
 function jamf_log_copy() {
+	# JAMF variables: for use with --keepjamflog / -k
+	JAMFLOG="/var/log/jamf.log"
+	TMP_JAMFLOG="${LOGPATH}/jamf.log"
+
 	# If jamf.log file exists, copy it off before restoring
 	if [ -f "${EXT_VOLUME}${JAMFLOG}" ]; then
 		writelog "Found jamf.log on external machine."
@@ -221,8 +221,7 @@ function jamf_log_copy() {
 		if [ "$DRY_RUN" = 1 ]; then
 			writelog "Dry-run: jamf.log copy"
 		else
-			# Make 
-			/bin/mkdir -p "${LOGPATH}"
+			# Copy
 			/bin/cp "${EXT_VOLUME}""${JAMFLOG}" "$TMP_JAMFLOG"
 
 			# Verify successful copy
@@ -235,7 +234,8 @@ function jamf_log_copy() {
 	else
 		writelog "jamf.log does not exist on target machine."
 		writelog "Please rerun script without --keepjamflog. Exiting ..."
-		exit 3
+		errorcode=3
+		print_exitcode
 	fi
 }
 
@@ -252,6 +252,17 @@ function jamf_log_copyback() {
 	fi
 }
 
+function make_log() {
+	# Make LOGPATH if it doesn't exist
+	if [ ! -d "$LOGPATH" ]; then
+		/bin/mkdir -p "${LOGPATH}"
+	fi
+	# Set default LOG destination if it doesn't exist
+	if [ "$LOG" = "" ]; then
+		LOG="${LOGPATH}/${NAME}-${LOGDATE}.log"
+	fi
+}
+
 function os_image_restore() {
 	# Get OS restore start timestamp
 	restore_start_time
@@ -262,7 +273,6 @@ function os_image_restore() {
 	
 	# Erase & Restore w/ no prompt
 	if [ "$FILESYSTEM" != "" ]; then
-
 		if [ "$DRY_RUN" = 1 ]; then
 			writelog "Dry-run: OS image restore"
 		else
@@ -271,13 +281,15 @@ function os_image_restore() {
 		fi
 	else
 		writelog "ERROR: Unsure what filesystem is to be configured. Exiting ..."
-		exit 4
+		errorcode=4
+		print_exitcode
 	fi
 
 	# Error check
 	if [ "$exitcode" != 0 ]; then
 		echo "${TEXT_RED}Failed to Restore. Exiting ...${TEXT_NORMAL}"
-		exit 5
+		errorcode=5
+		print_exitcode
 	else
 		# Get OS restore end timestamp
 		restore_end_time
@@ -286,11 +298,13 @@ function os_image_restore() {
 }
 
 function restore_start_time() {
-	RESTORE_START=$(/bin/date "+%Y-%m-%d %H:%M:%S")
+	# Use UTC to account for timezone variance
+	RESTORE_START=$(/bin/date -u "+%Y-%m-%d %H:%M:%S")
 }
 
 function restore_end_time() {
-	RESTORE_END=$(/bin/date "+%Y-%m-%d %H:%M:%S")
+	# Use UTC to account for timezone variance
+	RESTORE_END=$(/bin/date -u "+%Y-%m-%d %H:%M:%S")
 }
 
 function restore_done() {
@@ -320,15 +334,20 @@ function unmount_post_jamflogcopy() {
 
 function verify_root() {
 	if [ "$ROOT" != "root" ]; then
-		writelog "This script must be run as root - add 'sudo'"
-		exit 6
+		errorcode=6
+		print_exitcode
 	fi
 }
 
 function verify_os_images() {
-	if [ ! -f "${OS_IMAGE_PATH}/${APFS_OS_IMAGE}" ] || [ ! -f "${OS_IMAGE_PATH}/${HFS_OS_IMAGE}" ]; then
-		writelog "Specified OS Image file(s) does not exist. Exiting ..."
-		exit 7
+	if [ "$FORCE_HFS" = 1 ]; then
+		if [ ! -f "${OS_IMAGE_PATH}/${HFS_OS_IMAGE}" ]; then
+			errorcode=7
+			print_exitcode
+		fi
+	elif [ ! -f "${OS_IMAGE_PATH}/${APFS_OS_IMAGE}" ] || [ ! -f "${OS_IMAGE_PATH}/${HFS_OS_IMAGE}" ]; then
+		errorcode=8
+		print_exitcode
 	fi
 }
 
@@ -336,11 +355,13 @@ function verify_ext_disk() {
 	if [ "$EXT_DISK_DEVICEID" = "" ]; then
 		writelog "No external disk detected. Disconnect and reconnect the external computer."
 		writelog "Exiting ..."
-		exit 8
+		errorcode=9
+		print_exitcode
 	elif [ ! -d "$EXT_VOLUME" ]; then
 		writelog "No mounted external disk volume detected. Disconnect and reconnect the external computer."
 		writelog "Exiting ..."
-		exit 9
+		errorcode=10
+		print_exitcode
 	fi
 }
 
@@ -371,11 +392,15 @@ function write_compname_txt() {
 		writelog "Successfully wrote ${COMPNAME_FILE}!"
 	else
 		writelog "No ${COMPNAME_FILE} file detected. File write failed. Exiting ..."
-		exit 10
+		errorcode=11
+		print_exitcode
 	fi
 }
 
 ######## CHECKS & SCRIPT ########
+
+# Make LOGPATH if it doesn't exist
+make_log
 
 # Parse commands
 while [ ${#} -gt 0 ]; do
@@ -402,17 +427,32 @@ while [ ${#} -gt 0 ]; do
     	--compname | -c)
     		COMPNAME="$2"
     		if [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" = 1 ]; then
-    			wr "Error: No computer hostname provided."
+    			writelog "Error: No computer hostname provided."
     			writelog "You must specify a name for the machine - ex. ./${PROGRAM} -c <compname>"
-				exit 11
+				errorcode=12
+				print_exitcode
 			elif [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" != 1 ]; then
 				writelog "Error: While you have made setting a computer hostname not \
 				required, you have not provided a computer hostname"
-				exit 12
+				errorcode=13
+				print_exitcode
 			fi
     		writelog "Will set computer hostname to ${COMPNAME} ..."
     		shift
       		;;
+      	--log-path | -l)
+			LOGPATH="$2"
+			if [ "$LOGPATH" = "" ] || [[ "$LOGPATH" == -* ]]; then
+				writelog "Error: no directory specified for --log-path"
+				errorcode=14
+				print_exitcode
+			elif [ ! -d "$LOGPATH" ]; then
+				writelog "Error: specified --log-path does not exist."
+				errorcode=15
+				print_exitcode
+			fi
+			shift
+			;;
     	--keepjamflog | -k)
     		KEEPJAMFLOG=1
     		writelog "Will attempt to copy jamf.log from machine ..."
@@ -426,8 +466,9 @@ while [ ${#} -gt 0 ]; do
 			writelog "Will use HFS image instead of APFS image ..."
 			;;
       	*)
-      		writelog "Unknown command / parameter '${1}'"
-      		exit 13
+      		writelog "Unknown argument provided '${1}'"
+      		errorcode=17
+      		print_exitcode
       		;;
     esac
     shift 1
@@ -449,8 +490,6 @@ fi
 
 # Verify an external disk is detected and a volume is mounted
 verify_ext_disk
-
-####### SCRIPT
 			
 ##### Step 1 - Copy jamf.log off machine before erase, if desired (if it exists)
 
@@ -486,6 +525,7 @@ if [ "$REQUIRE_COMPNAME" = 1 ]; then
 	write_compname_txt
 fi
 
+# Unmount
 if [ "$FUSION_DRIVE" = "Yes" ]; then
 	# Wait a bit for the Fusion Drive before unmounting
 	/bin/sleep 5
@@ -495,7 +535,7 @@ else
 fi
 
 ##### DONE
-
+# Announce completion
 restore_done
 
 exit

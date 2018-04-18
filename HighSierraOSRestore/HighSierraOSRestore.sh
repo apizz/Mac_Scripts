@@ -159,45 +159,47 @@ function assess_storage_type() {
 	EXT_DISK_DEVICEID=$(/usr/sbin/diskutil list external | /usr/bin/awk '/0:/{print $NF}' | /usr/bin/tail -1)
 	FUSION_DRIVE=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICEID} | /usr/bin/awk '/Fusion Drive/{print $NF}')
 	
-	if [ "$FUSION_DRIVE" = "Yes" ]; then
-		# Fusion Drive
-		EXT_DISK_DEVICENODE="$EXT_DISK_DEVICEID"
-		FILESYSTEM="HFS"
-		OS_IMAGE="$HFS_OS_IMAGE"
-		STORAGE_TYPE="a Fusion Drive"
-	else
-		SSD=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICEID} | /usr/bin/grep "SSD")
-		### NEED WORK HERE FOR DIFFERENTIATING HFS vs. APFS FORMATTED DRIVES ###
-		EXT_DISK_ID=$(/bin/ls -1 /dev | /usr/bin/grep "^${EXT_DISK_DEVICEID}" | /usr/bin/tail -1)
-		EXT_DISK_FS=$(/usr/sbin/diskutil info ${EXT_DISK_ID} | /usr/bin/awk '/Type (Bundle)/{print $NF}')
-		if [ "$SSD" != "" ]; then
-			if [ "$FORCE_HFS" = 1 ]; then
-				# SSD & HFS
+	if [ "$EXT_DISK_DEVICEID" != "" ]; then
+		if [ "$FUSION_DRIVE" = "Yes" ]; then
+			# Fusion Drive
+			EXT_DISK_DEVICENODE="$EXT_DISK_DEVICEID"
+			FILESYSTEM="HFS"
+			OS_IMAGE="$HFS_OS_IMAGE"
+			STORAGE_TYPE="a Fusion Drive"
+		else
+			SSD=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICEID} | /usr/bin/grep "SSD")
+			### NEED WORK HERE FOR DIFFERENTIATING HFS vs. APFS FORMATTED DRIVES ###
+			EXT_DISK_ID=$(/bin/ls -1 /dev | /usr/bin/grep "^${EXT_DISK_DEVICEID}" | /usr/bin/tail -1)
+			EXT_DISK_FS=$(/usr/sbin/diskutil info ${EXT_DISK_ID} | /usr/bin/awk '/Type (Bundle)/{print $NF}')
+			if [ "$SSD" != "" ]; then
+				if [ "$FORCE_HFS" = 1 ]; then
+					# SSD & HFS
+					EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s2"
+					FILESYSTEM="HFS"
+					OS_IMAGE="$HFS_OS_IMAGE"
+					STORAGE_TYPE="an SSD"
+				else
+					# SSD & APFS
+					EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s1"
+					FILESYSTEM="APFS"
+					OS_IMAGE="$APFS_OS_IMAGE"
+					STORAGE_TYPE="an SSD"
+				fi
+			else
+				# HDD
 				EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s2"
 				FILESYSTEM="HFS"
 				OS_IMAGE="$HFS_OS_IMAGE"
-				STORAGE_TYPE="an SSD"
-			else
-				# SSD & APFS
-				EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s1"
-				FILESYSTEM="APFS"
-				OS_IMAGE="$APFS_OS_IMAGE"
-				STORAGE_TYPE="an SSD"
+				STORAGE_TYPE="an HDD"
 			fi
-		else
-			# HDD
-			EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s2"
-			FILESYSTEM="HFS"
-			OS_IMAGE="$HFS_OS_IMAGE"
-			STORAGE_TYPE="an HDD"
 		fi
+	
+		# Print hardware storage info
+		writelog "Storage type is ${STORAGE_TYPE}. Will use ${FILESYSTEM} filesystem for OS restore ..."
+	
+		VOLUMEPATH=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICENODE} | /usr/bin/grep "Mount Point" | /usr/bin/sed 's/^[^/]*//')
+		EXT_VOLUME="$VOLUMEPATH"
 	fi
-	
-	# Print hardware storage info
-	writelog "Storage type is ${STORAGE_TYPE}. Will use ${FILESYSTEM} filesystem for OS restore ..."
-	
-	VOLUMEPATH=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICENODE} | /usr/bin/grep "Mount Point" | /usr/bin/sed 's/^[^/]*//')
-	EXT_VOLUME="$VOLUMEPATH"
 }
 
 function check_compname() {

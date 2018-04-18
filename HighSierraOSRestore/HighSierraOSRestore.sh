@@ -348,10 +348,10 @@ function restore_end_time() {
 
 function restore_done() {
 	writelog ""
-	writelog "DONE! Safe to unplug target machine."
+	writelog "DONE! Safe to unplug external machine."
 
 	# State completion
-	/usr/bin/say "OS restore complete for ${COMPNAME}. Please disconnect."
+	/usr/bin/say "OS restore complete. Please disconnect."
 }
 
 function unmount_disk() {

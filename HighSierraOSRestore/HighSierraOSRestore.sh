@@ -117,7 +117,9 @@ Optional Arguments:
   --keepjamflog, -k	Will copy the jamf log off the external machine (if it exists) to
   			${LOGPATH} folder and copy it back after
   			the restore.
-  --log-path, -l	Specify an alternate path than the default set in the script."
+  --log-path, -l	Specify an alternate path than the default set in the script.
+  --no-imagescan	For use with --dry-run, will not perform an asr imagescan on
+  			the applicable OS_IMAGE file"
 }
 
 function version() {
@@ -284,10 +286,14 @@ function os_image_restore() {
 		# If dry-run enabled, run an imagescan on the OS image
 		if [ "$DRY_RUN" = 1 ]; then
 			writelog "Dry-run: OS image restore"
-			writelog "Dry-run: Performing image scan"
-			# Perform ASR imagescan
-			/usr/sbin/asr imagescan --source "${OS_IMAGE_PATH}/${OS_IMAGE}"
-			exitcode=$(/bin/echo $?)
+			if [ "$IMAGESCAN" = 0 ]; then
+				writelog "Dry-run: Will not perform asr imagescan ..."
+			else		
+				writelog "Dry-run: Performing asr imagescan ..."
+				# Perform ASR imagescan
+				/usr/sbin/asr imagescan --source "${OS_IMAGE_PATH}/${OS_IMAGE}"
+				exitcode=$(/bin/echo $?)
+			fi
 		else
 			writelog "Beginning erase & restore ..."
 			writelog "Restoring $OS_IMAGE ..."
@@ -302,7 +308,7 @@ function os_image_restore() {
 	fi
 
 	# Error check
-	if [ "$DRY_RUN" = 1 ]; then
+	if [ "$DRY_RUN" = 1 ] && [ "$IMAGESCAN" != 0 ]; then
 		if [ "$exitcode" != 0 ]; then
 			writelog "Dry-run: OS imagescan failed on ${OS_IMAGE}"
 			errorcode=4
@@ -448,6 +454,9 @@ while [ ${#} -gt 0 ]; do
 		--dry-run | -d)
 			DRY_RUN=1
 			writelog "${TEXT_GREEN}Dry-run enabled${TEXT_NORMAL}"
+			;;
+		--no-imagescan)
+			IMAGESCAN=0
 			;;
       	--reusecompname)
     		REUSE_COMPNAME=1

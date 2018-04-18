@@ -567,6 +567,8 @@ if [ "$FUSION_DRIVE" = "Yes" ]; then
 	# Wait a bit for the Fusion Drive before unmounting
 	/bin/sleep 5
 	unmount_disk
+elif [ "$DRY_RUN" = 1 ]; then
+	writelog "Dry-run: Will not unmount external machine"
 else
 	unmount_disk
 fi

@@ -412,13 +412,12 @@ function write_restore_timestamps() {
 }
 
 function write_compname_txt() {
-	writelog "Writing ${COMPNAME} to ${COMPNAME_FILE} ..."
-
 	# Write file
 	if [ "$DRY_RUN" = 1 ]; then
 		writelog "Dry-run: Write ${EXT_VOLUME}${COMPNAME_FILE}"
 	else
-		writelog "$COMPNAME" > "${EXT_VOLUME}${COMPNAME_FILE}"
+		writelog "Writing ${COMPNAME} to ${COMPNAME_FILE} ..."
+		/bin/echo "$COMPNAME" > "${EXT_VOLUME}${COMPNAME_FILE}"
 	fi
 
 	if [ "$DRY_RUN" = 1 ]; then

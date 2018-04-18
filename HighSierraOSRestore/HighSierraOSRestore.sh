@@ -329,6 +329,10 @@ function os_image_restore() {
 			restore_end_time
 			echo "${TEXT_GREEN}${RESTORE_END}${TEXT_NORMAL}"
 		fi
+	else
+		# Get OS restore end timestamp
+		restore_end_time
+		echo "${TEXT_GREEN}${RESTORE_END}${TEXT_NORMAL}"
 	fi
 }
 

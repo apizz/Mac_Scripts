@@ -368,7 +368,7 @@ function unmount_post_jamflogcopy() {
 
 function verify_root() {
 	if [ "$ROOT" != "root" ]; then
-		errorcode=6
+		errorcode=7
 		print_exitcode
 	fi
 }
@@ -376,21 +376,21 @@ function verify_root() {
 function verify_os_images() {
 	if [ "$FORCE_HFS" = 1 ]; then
 		if [ ! -f "${OS_IMAGE_PATH}/${HFS_OS_IMAGE}" ]; then
-			errorcode=7
+			errorcode=8
 			print_exitcode
 		fi
 	elif [ ! -f "${OS_IMAGE_PATH}/${APFS_OS_IMAGE}" ] || [ ! -f "${OS_IMAGE_PATH}/${HFS_OS_IMAGE}" ]; then
-		errorcode=8
+		errorcode=9
 		print_exitcode
 	fi
 }
 
 function verify_ext_disk() {
 	if [ "$EXT_DISK_DEVICEID" = "" ]; then
-		errorcode=9
+		errorcode=10
 		print_exitcode
 	elif [ ! -d "$EXT_VOLUME" ]; then
-		errorcode=10
+		errorcode=11
 		print_exitcode
 	fi
 }
@@ -420,7 +420,7 @@ function write_compname_txt() {
 	elif [ -f "${EXT_VOLUME}${COMPNAME_FILE}" ]; then
 		writelog "Successfully wrote ${COMPNAME_FILE}!"
 	else
-		errorcode=11
+		errorcode=12
 		print_exitcode
 	fi
 }

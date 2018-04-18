@@ -30,7 +30,7 @@ or move from HFS to APFS (SSDs only) based on the drive storage media.
 
 - Use `--compname`Write a file with the desired computer hostname for collection & use later in your deployment workflow.
 
-- If you've restored an OS image via this script previously and used --compname / -c to write a file with your desired hostname, use `--reusecompname` to refer to this file instead of entering the same or different hostname.
+- If you've restored an OS image via this script previously and used `--compname / -c` to write a file with your desired hostname, use `--reusecompname` to refer to this file instead of entering the same or different hostname.
 
 - Use `--timestamps` to write the OS image restore start and end date and time for collection & use later in your deployment workflow.  For example, I like to know how long it takes to go from base Mac to fully deployed and use this as part of the calculation.
 
@@ -50,7 +50,7 @@ or move from HFS to APFS (SSDs only) based on the drive storage media.
 ### Examples
 
 `sudo ./HighSierraOSRestore.sh [argument] --dry-run`
-- Runs script printing all output given supplied arguments, but does not complete a restore or write any files to the external machine. Great for testing!
+- Runs script printing all output given supplied arguments, but does not complete a restore or write any files to the external machine. Will instead perform an imagescan on the OS_IMAGE file. Great for testing!
 
 `sudo ./HighSierraOSRestore.sh --compname <compname>`
 - Following OS restore, writes file (COMPNAME_FILE) with the computer name

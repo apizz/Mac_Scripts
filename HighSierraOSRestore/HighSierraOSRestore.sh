@@ -47,39 +47,41 @@ EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding erro
 "1: --reusecompname: No computer hostname found in ${COMPNAME_FILE}"
 "2: --reusecompname: No ${COMPNAME_FILE} found on external machine"
 "3: --keepjamflog: No jamf.log file found on external machine"
-"4: Filesystem unable to be determined on external machine"
-"5: Filesystem restore failed"
-"6: Script not run as 'root'"
-"7: --force-hfs: Specified HFS image at OS_IMAGE_PATH (${OS_IMAGE_PATH}) does not exist"
-"8: One or more missing OS image files from OS_IMAGE_PATH (${OS_IMAGE_PATH})"
-"9: No external machine connected"
-"10: No external machine volume mounted"
-"11: Failed to write ${COMPNAME_FILE} file with computer hostname"
-"12: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to required"
-"13: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to not required"
-"14: --log-path: No log path defined"
-"15: Specified --log-path directory does not exist"
-"16: No arguments passed to script"
-"17: Unknown argument passed to script")
+"4: --dry-run: OS restore imagescan failed"
+"5: Filesystem unable to be determined on external machine"
+"6: Filesystem restore failed"
+"7: Script not run as 'root'"
+"8: --force-hfs: Specified HFS image at OS_IMAGE_PATH (${OS_IMAGE_PATH}) does not exist"
+"9: One or more missing OS image files from OS_IMAGE_PATH (${OS_IMAGE_PATH})"
+"10: No external machine connected"
+"11: No external machine volume mounted"
+"12: Failed to write ${COMPNAME_FILE} file with computer hostname"
+"13: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to required"
+"14: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to not required"
+"15: --log-path: No log path defined"
+"16: Specified --log-path directory does not exist"
+"17: No arguments passed to script"
+"18: Unknown argument passed to script")
 
 EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please use --compname / -c instead" #1
 "Please use --compname / -c instead" #2
 "Please run again without --keepjamflog" #3
-"None .... sorry  ¯\_(ツ)_/¯" #4
-"Please try again. If failures continue, you may have an issue with one of your OS image files" #5
-"Please run again with 'sudo'" #6
-"Verify your OS_IMAGE_PATH and HFS_OS_IMAGE variables are correct." #7
-"Verify your APFS_OS_IMAGE and HFS_OS_IMAGE variables are correct" #8
-"Please connect or reconnect your Target Disk Mode machine" #9
-"Please connect or reconnect your Target Disk Mode machine" # 10
-"Please try running again" #11
-"Please supply a computer hostname: ex. --compname <compname> OR make REQUIRE_COMPNAME set to 0" #12
-"Please either set REQUIRE_COMPNAME to 1 and provide a desired computer name, or remove your --compname argument" #13
-"Please specify a path to an existing directory" #14
+"" #4
+"None .... sorry  ¯\_(ツ)_/¯" #5
+"Please try again. If failures continue, you may have an issue with one of your OS image files" #6
+"Please run again with 'sudo'" #7
+"Verify your OS_IMAGE_PATH and HFS_OS_IMAGE variables are correct." #8
+"Verify your APFS_OS_IMAGE and HFS_OS_IMAGE variables are correct" #9
+"Please connect or reconnect your Target Disk Mode machine" #10
+"Please connect or reconnect your Target Disk Mode machine" # 11
+"Please try running again" #12
+"Please supply a computer hostname: ex. --compname <compname> OR make REQUIRE_COMPNAME set to 0" #13
+"Please either set REQUIRE_COMPNAME to 1 and provide a desired computer name, or remove your --compname argument" #14
 "Please specify a path to an existing directory" #15
-"Please provide an argument, or use --dry-run to test" #16
-"Please remove the unknown argument") #17
+"Please specify a path to an existing directory" #16
+"Please provide an argument, or use --dry-run to test" #17
+"Please remove the unknown argument") #18
 
 ##### FUNCTIONS
 
@@ -98,7 +100,8 @@ Arguments:
   --help, -h		Show this help message.
   --version, -v		Show version info.
   --exitcodes, -e	Show the exit code error list.
-  --dry-run, -d		Run through script workflow to test output & results.
+  --dry-run, -d		Run through script workflow to test output & results. Performs
+  			ASR imagescan to verify your OS image is OK for restore.
   --force-hfs, -f	For opting to use an HFS OS image over an APFS image on SSDs.
 
 
@@ -276,14 +279,19 @@ function os_image_restore() {
 	restore_start_time
 	echo "${TEXT_GREEN}${RESTORE_START}${TEXT_NORMAL}"
 	
-	writelog "Beginning erase & restore ..."
-	writelog "Restoring $OS_IMAGE ..."
-	
 	# Erase & Restore w/ no prompt
 	if [ "$FILESYSTEM" != "" ]; then
+		# If dry-run enabled, run an imagescan on the OS image
 		if [ "$DRY_RUN" = 1 ]; then
 			writelog "Dry-run: OS image restore"
+			writelog "Dry-run: Performing image scan"
+			# Perform ASR imagescan
+			/usr/sbin/asr imagescan --source "${OS_IMAGE_PATH}/${OS_IMAGE}"
+			exitcode=$(/bin/echo $?)
 		else
+			writelog "Beginning erase & restore ..."
+			writelog "Restoring $OS_IMAGE ..."
+			# Restore
 			/usr/sbin/asr restore --source "${OS_IMAGE_PATH}/${OS_IMAGE}" --target /dev/${EXT_DISK_DEVICENODE} --erase --noprompt
 			exitcode=$(/bin/echo $?)
 		fi
@@ -294,14 +302,26 @@ function os_image_restore() {
 	fi
 
 	# Error check
-	if [ "$exitcode" != 0 ]; then
-		echo "${TEXT_RED}Failed to Restore. Exiting ...${TEXT_NORMAL}"
-		errorcode=5
-		print_exitcode
+	if [ "$DRY_RUN" = 1 ]; then
+		if [ "$exitcode" != 0 ]; then
+			writelog "Dry-run: OS imagescan failed on ${OS_IMAGE}"
+			errorcode=4
+			print_exitcode
+		else
+			# Get OS imagescan end timestamp
+			restore_end_time
+			echo "${TEXT_GREEN}${RESTORE_END}${TEXT_NORMAL}"
+		fi
 	else
-		# Get OS restore end timestamp
-		restore_end_time
-		echo "${TEXT_GREEN}${RESTORE_END}${TEXT_NORMAL}"
+		if [ "$exitcode" != 0 ]; then
+			echo "${TEXT_RED}Failed to Restore. Exiting ...${TEXT_NORMAL}"
+			errorcode=5
+			print_exitcode
+		else
+			# Get OS restore end timestamp
+			restore_end_time
+			echo "${TEXT_GREEN}${RESTORE_END}${TEXT_NORMAL}"
+		fi
 	fi
 }
 

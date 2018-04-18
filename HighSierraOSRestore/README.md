@@ -38,29 +38,31 @@ or move from HFS to APFS (SSDs only) based on the drive storage media.
 
 ## Usage
 
-./HighSierraOSRestore.sh --help
-	Show
+`./HighSierraOSRestore.sh --help`
+- Show help message
 
-./HighSierraOSRestore.sh --version
+`./HighSierraOSRestore.sh --version`
+- Show version information
 
-./HighSierraOSRestore.sh --exitcodes
+`./HighSierraOSRestore.sh --exitcodes`
+- Show the exit code error list
 
 ### Examples
 
-sudo ./HighSierraOSRestore.sh [argument] --dry-run
+`sudo ./HighSierraOSRestore.sh [argument] --dry-run`
 - Runs script printing all output given supplied arguments, but does not complete a restore or write any files to the external machine. Great for testing!
 
-sudo ./HighSierraOSRestore.sh --compname <compname>
+`sudo ./HighSierraOSRestore.sh --compname <compname>`
 - Following OS restore, writes file (COMPNAME_FILE) with the computer name
 
-sudo ./HighSierraOSRestore.sh --reusecompname
+`sudo ./HighSierraOSRestore.sh --reusecompname`
 - Checks for pre-existing COMPNAME_FILE on external machine, and if found will collect it and write it back following successful OS restore.
 
-sudo ./HighSierraOSRestore.sh --keepjamflog
+`sudo ./HighSierraOSRestore.sh --keepjamflog`
 - Prior to OS restore, copies the /var/log/jamf.log file off the exernal machine and copies it back following successful OS restore.
 
-sudo ./HighSierraOSRestore.sh --log-path /path/to/log/folder
+`sudo ./HighSierraOSRestore.sh --log-path /path/to/log/folder`
 - Writes log output to the specified path.
 
-sudo ./HighSierraOSRestore.sh --timestamps
+`sudo ./HighSierraOSRestore.sh --timestamps`
 - Following OS restore, will write the collected restore start and end timestamps to a PLIST on the external machine.

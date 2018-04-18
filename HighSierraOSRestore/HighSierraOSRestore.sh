@@ -138,9 +138,9 @@ function exit_codes_help() {
 
 function print_exitcode() {
 	EXITRESULT=$(/usr/bin/printf '%s\n' "${EXITCODE_ARRAY[$errorcode]}")
-	#EXITHELP=$(/usr/bin/printf '%s\n' "${EXITCODE_HELP_ARRAY[$errorcode]}")
+	EXITHELP=$(/usr/bin/printf '%s\n' "${EXITCODE_HELP_ARRAY[$errorcode]}")
 	writelog "Error Code:  $EXITRESULT"
-	#writelog "Recommendation:  $EXITHELP"
+	writelog "Recommendation:  $EXITHELP"
 	exit $errorcode
 }
 

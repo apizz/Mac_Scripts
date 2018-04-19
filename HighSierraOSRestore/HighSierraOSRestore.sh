@@ -181,8 +181,12 @@ function hfs_hdd_vars() {
 	STORAGE_TYPE="an HDD"
 }
 
-function assess_storage_type() {
+function ext_disk_info() {
 	EXT_DISK_DEVICEID=$(/usr/sbin/diskutil list external | /usr/bin/awk '/0:/{print $NF}' | /usr/bin/tail -1)
+}
+
+function assess_storage_type() {
+	ext_disk_info
 	FUSION_DRIVE=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICEID} | /usr/bin/awk '/Fusion Drive/{print $NF}')
 	
 	if [ "$EXT_DISK_DEVICEID" != "" ]; then
@@ -586,8 +590,14 @@ os_image_restore
 
 # Need to fully unmount APFS disk and remount to potentially do other things
 if [ "$FS" = "APFS" ]; then
- 	unmount_disk
- 	apfs_mount_post_restore
+	# If external disk was previously hfs, collect new volume info
+ 	if [ "$EXT_DISK_FS" = "hfs" ]; then
+ 		ext_disk_info
+ 		EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s1"
+ 	else
+		unmount_disk
+		apfs_mount_post_restore
+ 	fi
 fi
 
 # Only if using --keepjamflog: write jamf.log back

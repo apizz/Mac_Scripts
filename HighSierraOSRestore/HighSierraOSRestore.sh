@@ -597,9 +597,12 @@ os_image_restore
 if [ "$FS" = "APFS" ]; then
 	# If external disk was previously hfs, collect new disk & volume info
  	if [ "$EXT_DISK_FS" = "hfs" ]; then
- 		ext_disk_info
- 		EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s1"
- 		volume_path_info
+ 		unmount_disk
+ 		NEW_EXT_DISK_DEVICENODE="disk3s1"
+		writelog "Mounting ${EXT_VOLUME} ..."
+		# Mount to /Volumes/Macintosh HD 1
+		/bin/mkdir "$EXT_VOLUME"
+		/sbin/mount_apfs /dev/${NEW_EXT_DISK_DEVICENODE} "$EXT_VOLUME"
  	else
 		unmount_disk
 		apfs_mount_post_restore

@@ -376,11 +376,19 @@ function restore_end_time() {
 }
 
 function restore_done() {
-	writelog ""
-	writelog "DONE! Safe to unplug external machine."
+	if [ "$DRY_RUN" = 1 ]; then
+		writelog ""
+		writelog "Dry run complete."
 
-	# State completion
-	/usr/bin/say "OS restore complete. Please disconnect."
+		# State completion
+		/usr/bin/say "Dry run complete."
+	else
+		writelog ""
+		writelog "DONE! Safe to unplug external machine."
+
+		# State completion
+		/usr/bin/say "OS restore complete. Please disconnect."
+	fi
 }
 
 function unmount_disk() {

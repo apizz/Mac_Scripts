@@ -229,9 +229,9 @@ function assess_storage_type() {
 		# Print hardware storage info
 		writelog "External storage type is ${STORAGE_TYPE}. Format: ${EXT_DISK_FS}."
 		writelog "Will use ${FS} filesystem for OS restore ..."
-	
-		VOLUMEPATH=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICENODE} | /usr/bin/grep "Mount Point" | /usr/bin/sed 's/^[^/]*//')
-		EXT_VOLUME="$VOLUMEPATH"
+		
+		# Get volume info
+		volume_path_info
 	fi
 }
 
@@ -379,6 +379,11 @@ function restore_start_time() {
 function restore_end_time() {
 	# Use UTC to account for timezone variance
 	RESTORE_END=$(/bin/date -u "+%Y-%m-%d %H:%M:%S")
+}
+
+function volume_path_info() {
+	VOLUMEPATH=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICENODE} | /usr/bin/grep "Mount Point" | /usr/bin/sed 's/^[^/]*//')
+	EXT_VOLUME="$VOLUMEPATH"
 }
 
 function restore_done() {
@@ -590,10 +595,11 @@ os_image_restore
 
 # Need to fully unmount APFS disk and remount to potentially do other things
 if [ "$FS" = "APFS" ]; then
-	# If external disk was previously hfs, collect new volume info
+	# If external disk was previously hfs, collect new disk & volume info
  	if [ "$EXT_DISK_FS" = "hfs" ]; then
  		ext_disk_info
  		EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s1"
+ 		volume_path_info
  	else
 		unmount_disk
 		apfs_mount_post_restore

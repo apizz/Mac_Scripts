@@ -149,12 +149,17 @@ function print_exitcode() {
 	exit $errorcode
 }
 
-function apfs_mount_post_restore() {
+function apfs_mount() {
 	writelog "Mounting ${EXT_VOLUME} ..."
 	
 	# Mount to /Volumes/Macintosh HD 1
 	/bin/mkdir "$EXT_VOLUME"
 	/sbin/mount_apfs /dev/${EXT_DISK_DEVICENODE} "$EXT_VOLUME"
+}
+
+function mount_ext_disk() {
+	# Mount disk partition
+	/usr/sbin/diskutil mountDisk ${EXT_DISK_DEVICENODE}
 }
 
 function apfs_ssd_vars() {
@@ -599,11 +604,13 @@ if [ "$FS" = "APFS" ]; then
  	if [ "$EXT_DISK_FS" = "hfs" ]; then
  		unmount_disk
  		EXT_DISK_DEVICENODE="disk3s1"
-		apfs_mount_post_restore
+		apfs_mount
  	else
 		unmount_disk
-		apfs_mount_post_restore
+		apfs_mount
  	fi
+else
+	mount_ext_disk
 fi
 
 # Only if using --keepjamflog: write jamf.log back

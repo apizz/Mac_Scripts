@@ -327,7 +327,7 @@ function os_image_restore() {
 				unmount_disk
 			fi
 			# Restore
-			if [ "$FS" = "APFS" ]; then
+			if [ "$EXT_DISK_FS" = "APFS" ]; then
 				/usr/sbin/asr restore --source "${OS_IMAGE_PATH}/${OS_IMAGE}" --target /dev/${EXT_DISK_DEVICEID} --erase --noprompt
 				exitcode=$(/bin/echo $?)
 			else

@@ -323,7 +323,7 @@ function os_image_restore() {
 			writelog "Restoring $OS_IMAGE ..."
 			# Fully unmount HFS disk
 			if [ "$EXT_DISK_FS" = "hfs" ]; then
-				writelog "Unmounting existernal"
+				writelog "Unmounting external disk ..."
 				unmount_disk
 			fi
 			# Restore

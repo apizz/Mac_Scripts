@@ -34,7 +34,7 @@ PROGRAM="${NAME}.sh"
 AUTHOR="AP Orlebeke"
 VERSION="1.0"
 GITHUB="https://github.com/apizz/Mac_Scripts/HighSierraOSRestore"
-LAST_UPDATE_DATE="4/16/18"
+LAST_UPDATE_DATE="4/19/18"
 
 # Text formatting
 TEXT_NORMAL='\033[0m'
@@ -60,7 +60,8 @@ EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding erro
 "14: --compname / -c: No computer hostname defined; REQUIRE_COMPNAME set to not required"
 "15: --log-path: No log path defined"
 "16: Specified --log-path directory does not exist"
-"17: Unknown argument passed to script")
+"17: Unknown argument passed to script"
+"18: Unknown")
 
 EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please use --compname / -c instead" #1
@@ -79,7 +80,8 @@ EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please either set REQUIRE_COMPNAME to 1 and provide a desired computer name, or remove your --compname argument" #14
 "Please specify a path to an existing directory" #15
 "Please specify a path to an existing directory" #16
-"Please remove the unknown argument") #17
+"Please remove the unknown argument" #17
+"Please verify your external machine is in a macOS filesystem format (HFS or APFS)") #18
 
 ##### FUNCTIONS
 
@@ -155,6 +157,30 @@ function apfs_mount_post_restore() {
 	/sbin/mount_apfs /dev/${EXT_DISK_DEVICENODE} "$EXT_VOLUME"
 }
 
+function apfs_ssd_vars() {
+	FS="APFS"
+	OS_IMAGE="$APFS_OS_IMAGE"
+	STORAGE_TYPE="an SSD"
+}
+
+function hfs_ssd_vars() {
+	FS="HFS"
+	OS_IMAGE="$HFS_OS_IMAGE"
+	STORAGE_TYPE="an SSD"
+}
+
+function hfs_fusion_vars() {
+	FS="HFS"
+	OS_IMAGE="$HFS_OS_IMAGE"
+	STORAGE_TYPE="a Fusion Drive"
+}
+
+function hfs_hdd_vars() {
+	FS="HFS"
+	OS_IMAGE="$HFS_OS_IMAGE"
+	STORAGE_TYPE="an HDD"
+}
+
 function assess_storage_type() {
 	EXT_DISK_DEVICEID=$(/usr/sbin/diskutil list external | /usr/bin/awk '/0:/{print $NF}' | /usr/bin/tail -1)
 	FUSION_DRIVE=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICEID} | /usr/bin/awk '/Fusion Drive/{print $NF}')
@@ -163,39 +189,45 @@ function assess_storage_type() {
 		if [ "$FUSION_DRIVE" = "Yes" ]; then
 			# Fusion Drive
 			EXT_DISK_DEVICENODE="$EXT_DISK_DEVICEID"
-			FILESYSTEM="HFS"
-			OS_IMAGE="$HFS_OS_IMAGE"
-			STORAGE_TYPE="a Fusion Drive"
+			
 		else
 			SSD=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICEID} | /usr/bin/grep "SSD")
-			### NEED WORK HERE FOR DIFFERENTIATING HFS vs. APFS FORMATTED DRIVES ###
 			EXT_DISK_ID=$(/bin/ls -1 /dev | /usr/bin/grep "^${EXT_DISK_DEVICEID}" | /usr/bin/tail -1)
-			EXT_DISK_FS=$(/usr/sbin/diskutil info ${EXT_DISK_ID} | /usr/bin/awk '/Type (Bundle)/{print $NF}')
+			EXT_DISK_FS=$(/usr/sbin/diskutil info ${EXT_DISK_ID} | /usr/bin/awk '/Type \(Bundle\)/{print $NF}')
 			if [ "$SSD" != "" ]; then
-				if [ "$FORCE_HFS" = 1 ]; then
-					# SSD & HFS
-					EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s2"
-					FILESYSTEM="HFS"
-					OS_IMAGE="$HFS_OS_IMAGE"
-					STORAGE_TYPE="an SSD"
-				else
-					# SSD & APFS
+				# If SSD is formated for APFS ...
+				if [ "$EXT_DISK_FS" = "apfs" ]; then
 					EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s1"
-					FILESYSTEM="APFS"
-					OS_IMAGE="$APFS_OS_IMAGE"
-					STORAGE_TYPE="an SSD"
+					if [ "$FORCE_HFS" = 1 ]; then
+						# SSD & HFS
+						hfs_ssd_vars
+					else
+						# SSD & APFS
+						apfs_ssd_vars
+					fi
+				elif [ "$EXT_DISK_FS" = "hfs" ]; then
+					EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s2"
+					if [ "$FORCE_HFS" = 1 ]; then
+						# SSD & HFS
+						hfs_ssd_vars
+					else
+						# SSD & APFS
+						apfs_ssd_vars
+					fi
+				else
+					errorcode=18
+					print_exitcode
 				fi
 			else
 				# HDD
 				EXT_DISK_DEVICENODE="${EXT_DISK_DEVICEID}s2"
-				FILESYSTEM="HFS"
-				OS_IMAGE="$HFS_OS_IMAGE"
-				STORAGE_TYPE="an HDD"
+				hfs_hdd_vars
 			fi
 		fi
 	
 		# Print hardware storage info
-		writelog "Storage type is ${STORAGE_TYPE}. Will use ${FILESYSTEM} filesystem for OS restore ..."
+		writelog "External storage type is ${STORAGE_TYPE}. Format: ${EXT_DISK_FS}."
+		writelog "Will use ${FS} filesystem for OS restore ..."
 	
 		VOLUMEPATH=$(/usr/sbin/diskutil info ${EXT_DISK_DEVICENODE} | /usr/bin/grep "Mount Point" | /usr/bin/sed 's/^[^/]*//')
 		EXT_VOLUME="$VOLUMEPATH"
@@ -276,7 +308,7 @@ function os_image_restore() {
 	echo "${TEXT_GREEN}${RESTORE_START}${TEXT_NORMAL}"
 	
 	# Erase & Restore w/ no prompt
-	if [ "$FILESYSTEM" != "" ]; then
+	if [ "$FS" != "" ]; then
 		# If dry-run enabled, run an imagescan on the OS image
 		if [ "$DRY_RUN" = 1 ]; then
 			writelog "Dry-run: OS image restore"
@@ -293,7 +325,7 @@ function os_image_restore() {
 			writelog "Beginning erase & restore ..."
 			writelog "Restoring $OS_IMAGE ..."
 			# Restore
-			if [ "$FILESYSTEM" = "APFS" ]; then
+			if [ "$FS" = "APFS" ]; then
 				/usr/sbin/asr restore --source "${OS_IMAGE_PATH}/${OS_IMAGE}" --target /dev/${EXT_DISK_DEVICEID} --erase --noprompt
 				exitcode=$(/bin/echo $?)
 			else
@@ -537,7 +569,7 @@ os_image_restore
 ##### Step 3 - Maybe write some things to external disk
 
 # Need to fully unmount APFS disk and remount to potentially do other things
-if [ "$FILESYSTEM" = "APFS" ]; then
+if [ "$FS" = "APFS" ]; then
  	unmount_disk
  	apfs_mount_post_restore
 fi

@@ -61,7 +61,7 @@ EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding erro
 "15: --log-path: No log path defined"
 "16: Specified --log-path directory does not exist"
 "17: Unknown argument passed to script"
-"18: Unknown")
+"18: Unmount of external disk failed")
 
 EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please use --compname / -c instead" #1
@@ -81,7 +81,7 @@ EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please specify a path to an existing directory" #15
 "Please specify a path to an existing directory" #16
 "Please remove the unknown argument" #17
-"Please verify your external machine is in a macOS filesystem format (HFS or APFS)") #18
+"None .... sorry  ¯\_(ツ)_/¯") #18
 
 ##### FUNCTIONS
 
@@ -214,9 +214,6 @@ function assess_storage_type() {
 						# SSD & APFS
 						apfs_ssd_vars
 					fi
-				else
-					errorcode=18
-					print_exitcode
 				fi
 			else
 				# HDD
@@ -324,6 +321,11 @@ function os_image_restore() {
 		else
 			writelog "Beginning erase & restore ..."
 			writelog "Restoring $OS_IMAGE ..."
+			# Fully unmount HFS disk
+			if [ "$EXT_DISK_FS" = "hfs" ]; then
+				writelog "Unmounting existernal"
+				unmount_disk
+			fi
 			# Restore
 			if [ "$FS" = "APFS" ]; then
 				/usr/sbin/asr restore --source "${OS_IMAGE_PATH}/${OS_IMAGE}" --target /dev/${EXT_DISK_DEVICEID} --erase --noprompt
@@ -393,6 +395,12 @@ function restore_done() {
 
 function unmount_disk() {
 	/usr/sbin/diskutil unmountDisk /dev/${EXT_DISK_DEVICEID}
+	unmountstatus=$(/bin/echo $?)
+	
+	if [ "$unmountstatus" != 0 ]; then
+		errorcode=18
+		print_exitcode
+	fi
 }
 
 function unmount_post_jamflogcopy() {

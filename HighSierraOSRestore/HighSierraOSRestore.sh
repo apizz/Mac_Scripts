@@ -333,7 +333,7 @@ function os_image_restore() {
 			# Fully unmount HFS disk
 			if [ "$EXT_DISK_FS" = "hfs" ]; then
 				writelog "Unmounting external disk ..."
-				unmount_disk
+				unmount_ext_disk
 			fi
 			# Restore
 			if [ "$EXT_DISK_FS" = "APFS" ]; then
@@ -407,7 +407,7 @@ function restore_done() {
 	fi
 }
 
-function unmount_disk() {
+function unmount_ext_disk() {
 	/usr/sbin/diskutil unmountDisk /dev/${EXT_DISK_DEVICEID}
 	unmountstatus=$(/bin/echo $?)
 	
@@ -602,13 +602,13 @@ os_image_restore
 if [ "$FS" = "APFS" ]; then
 	# If external disk was previously hfs, override HFS devicenode with APFS one
  	if [ "$EXT_DISK_FS" = "hfs" ]; then
- 		unmount_disk
+ 		unmount_ext_disk
  		EXT_DISK_DEVICENODE="disk3s1"
-		apfs_mount
  	else
-		unmount_disk
-		apfs_mount
+		unmount_ext_disk
  	fi
+ 	# Remount APFS disk for potential additional writing ...
+ 	apfs_mount
 else
 	mount_ext_disk
 fi
@@ -632,11 +632,11 @@ fi
 if [ "$FUSION_DRIVE" = "Yes" ]; then
 	# Wait a bit for the Fusion Drive before unmounting
 	/bin/sleep 5
-	unmount_disk
+	unmount_ext_disk
 elif [ "$DRY_RUN" = 1 ]; then
 	writelog "Dry-run: Will not unmount external machine"
 else
-	unmount_disk
+	unmount_ext_disk
 fi
 
 ##### DONE

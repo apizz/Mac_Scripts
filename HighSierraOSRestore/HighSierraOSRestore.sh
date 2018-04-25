@@ -44,8 +44,8 @@ TEXT_YELLOW='\033[33m'
 TEXT_BLUE='\033[34m'
 
 EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding error code number
-"1: --reusecompname: No computer hostname found in ${COMPNAME_FILE}"
-"2: --reusecompname: No ${COMPNAME_FILE} found on external machine"
+"1: --reuse-compname: No computer hostname found in ${COMPNAME_FILE}"
+"2: --reuse-compname: No ${COMPNAME_FILE} found on external machine"
 "3: --keepjamflog: No jamf.log file found on external machine"
 "4: --dry-run: OS restore imagescan failed"
 "5: Filesystem unable to be determined on external machine"
@@ -93,7 +93,7 @@ function writelog() {
 function showhelp() {
 	/bin/echo "Usage:  sudo ./${PROGRAM} [--help] [--version] [--exitcodes] 
 			[--dry-run] [--force-hfs] [--compname <compname>]
-			[--reusecompname] [--timestamps] [--keepjamflog]
+			[--reuse-compname] [--timestamps] [--keepjamflog]
 			[--log-path <pathtologfolder>]
 
 Arguments:
@@ -109,7 +109,7 @@ Arguments:
 Optional Arguments:
   --compname, -c	Provide computer hostname for use as part of MDM enrollment
   			and computer renaming.
-  --reusecompname	Will attempt to use previous compname at COMPNAME_FILE
+  --reuse-compname	Will attempt to use previous compname at COMPNAME_FILE
   			(${COMPNAME_FILE}), if it exists.
   --timestamps, -t	Write timestamps before and after OS image restore to external
   			machine PLIST (${PLIST}) for use as part
@@ -530,7 +530,7 @@ while [ ${#} -gt 0 ]; do
 		--no-imagescan)
 			IMAGESCAN=0
 			;;
-      	--reusecompname)
+      	--reuse-compname)
     		REUSE_COMPNAME=1
     		;;
     	--compname | -c)
@@ -573,7 +573,7 @@ verify_os_images
 # Assess storage hardware type
 assess_storage_type
 
-# Only if using --reusecompname: Verify $COMPNAME_FILE exists and $COMPNAME is not empty
+# Only if using --reuse-compname: Verify $COMPNAME_FILE exists and $COMPNAME is not empty
 if [ "$REUSE_COMPNAME" = 1 ]; then
 	check_compname
 fi

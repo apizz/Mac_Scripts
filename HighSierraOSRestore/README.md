@@ -38,7 +38,7 @@ or move from HFS to APFS (SSDs only) based on the drive storage media.
 - Use `--no-imagescan` with `--dry-run` to skip the asr imagescan process
 	- Unless you use [AutoDMG](https://github.com/MagerValp/AutoDMG) to build images from the command-line and use [`--skip-asr-imagescan`](https://github.com/MagerValp/AutoDMG/issues/144), you can safely always use `--no-imagescan` with all your dry runs.
 
-- Use `--keepjamflog` to copy the jamf.log off a JAMF-managed machine prior to OS restore and copy it back afterward. Similar to what you may have been used to with Jamf Imaging.
+- Use `--keep-jamflog` to copy the jamf.log off a JAMF-managed machine prior to OS restore and copy it back afterward. Similar to what you may have been used to with Jamf Imaging.
 
 - Use `--compname` to write a file with the desired computer hostname for collection & use later in your macOS deployment workflow.
 
@@ -74,7 +74,7 @@ or move from HFS to APFS (SSDs only) based on the drive storage media.
 `sudo ./HighSierraOSRestore.sh --reuse-compname`
 - Checks for pre-existing COMPNAME_FILE on external machine, and if found will collect it and write it back following successful OS restore.
 
-`sudo ./HighSierraOSRestore.sh --keepjamflog`
+`sudo ./HighSierraOSRestore.sh --keep-jamflog`
 - Prior to OS restore, copies the /var/log/jamf.log file off the exernal machine and copies it back following successful OS restore.
 
 `sudo ./HighSierraOSRestore.sh --log-path /path/to/log/folder`

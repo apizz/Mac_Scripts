@@ -46,7 +46,7 @@ TEXT_BLUE='\033[34m'
 EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding error code number
 "1: --reuse-compname: No computer hostname found in ${COMPNAME_FILE}"
 "2: --reuse-compname: No ${COMPNAME_FILE} found on external machine"
-"3: --keepjamflog: No jamf.log file found on external machine"
+"3: --keep-jamflog: No jamf.log file found on external machine"
 "4: --dry-run: OS restore imagescan failed"
 "5: Filesystem unable to be determined on external machine"
 "6: Filesystem restore failed"
@@ -66,7 +66,7 @@ EXITCODE_ARRAY=("" # Dummy first line to align array index to corresponding erro
 EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please use --compname / -c instead" #1
 "Please use --compname / -c instead" #2
-"Please run again without --keepjamflog" #3
+"Please run again without --keep-jamflog" #3
 "Try rebuilding your AutoDMG OS image" #4
 "None .... sorry  ¯\_(ツ)_/¯" #5
 "Please try again. If failures continue, you may have an issue with one of your OS image files" #6
@@ -93,7 +93,7 @@ function writelog() {
 function showhelp() {
 	/bin/echo "Usage:  sudo ./${PROGRAM} [--help] [--version] [--exitcodes] 
 			[--dry-run] [--force-hfs] [--compname <compname>]
-			[--reuse-compname] [--timestamps] [--keepjamflog]
+			[--reuse-compname] [--timestamps] [--keep-jamflog]
 			[--log-path <pathtologfolder>]
 
 Arguments:
@@ -114,7 +114,7 @@ Optional Arguments:
   --timestamps, -t	Write timestamps before and after OS image restore to external
   			machine PLIST (${PLIST}) for use as part
   			of enrollment or larger deployment calculation.	
-  --keepjamflog, -k	Will copy the jamf log off the external machine (if it exists) to
+  --keep-jamflog, -k	Will copy the jamf log off the external machine (if it exists) to
   			${LOGPATH} folder and copy it back after
   			the restore.
   --log-path, -l	Specify an alternate path than the default set in the script.
@@ -257,7 +257,7 @@ function check_compname() {
 }
 
 function jamf_log_copy() {
-	# JAMF variables: for use with --keepjamflog / -k
+	# JAMF variables: for use with --keep-jamflog / -k
 	JAMFLOG="/var/log/jamf.log"
 	TMP_JAMFLOG="${LOGPATH}/jamf.log"
 
@@ -544,7 +544,7 @@ while [ ${#} -gt 0 ]; do
 			verify_logpath
 			shift
 			;;
-    	--keepjamflog | -k)
+    	--keep-jamflog | -k)
     		KEEPJAMFLOG=1
     		writelog "Will attempt to copy jamf.log from machine ..."
       		;;
@@ -583,7 +583,7 @@ verify_ext_disk
 			
 ##### Step 1 - Copy jamf.log off machine before erase, if desired (if it exists)
 
-# Only if using --keepjamflog
+# Only if using --keep-jamflog
 if [ "$KEEPJAMFLOG" = 1 ]; then
 	jamf_log_copy
 fi
@@ -609,7 +609,7 @@ else
 	mount_ext_disk
 fi
 
-# Only if using --keepjamflog: write jamf.log back
+# Only if using --keep-jamflog: write jamf.log back
 if [ "$KEEPJAMFLOG" = 1 ]; then
 	jamf_log_copyback
 fi

@@ -417,19 +417,6 @@ function unmount_ext_disk() {
 	fi
 }
 
-function unmount_post_jamflogcopy() {
-	writelog "Unmounting post jamf log copy ..."
-	
-	# Unmount
-	/usr/sbin/diskutil unmount ${EXT_DISK_DEVICENODE}
-	unmountcode=$(/bin/echo $?)
-
-	# Only remove the created /Volumes directory if unmount successful
-	if [ "$unmountcode" = 0 ]; then
-		/bin/rm -rf "$EXT_VOLUME"
-	fi
-}
-
 function verify_root() {
 	if [ "$ROOT" != "root" ]; then
 		errorcode=7
@@ -458,6 +445,33 @@ function verify_ext_disk() {
 		print_exitcode
 	fi
 }
+
+function verify_compname() {
+	if [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" = 1 ]; then
+		errorcode=13
+		print_exitcode
+	elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" = 1 ]; then
+		errorcode=13
+		print_exitcode
+	elif [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" != 1 ]; then
+		errorcode=14
+		print_exitcode
+	elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" != 1 ]; then
+		errorcode=14
+		print_exitcode
+	fi
+}
+
+function verify_logpath() {
+	if [ "$LOGPATH" = "" ] || [[ "$LOGPATH" == -* ]]; then
+		errorcode=15
+		print_exitcode
+	elif [ ! -d "$LOGPATH" ]; then
+		errorcode=16
+		print_exitcode
+	fi
+}
+
 
 function write_restore_timestamps() {
 	# Write OS Restore Start & End Timestamps
@@ -521,31 +535,13 @@ while [ ${#} -gt 0 ]; do
     		;;
     	--compname | -c)
     		COMPNAME="$2"
-    		if [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" = 1 ]; then
-				errorcode=13
-				print_exitcode
-			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" = 1 ]; then
-				errorcode=13
-				print_exitcode
-			elif [[ "$COMPNAME" == -* ]] && [ "$REQUIRE_COMPNAME" != 1 ]; then
-				errorcode=14
-				print_exitcode
-			elif [ "$COMPNAME" = "" ] && [ "$REQUIRE_COMPNAME" != 1 ]; then
-				errorcode=14
-				print_exitcode
-			fi
+    		verify_compname
     		writelog "Will set computer hostname to ${COMPNAME} ..."
     		shift
       		;;
       	--log-path | -l)
 			LOGPATH="$2"
-			if [ "$LOGPATH" = "" ] || [[ "$LOGPATH" == -* ]]; then
-				errorcode=15
-				print_exitcode
-			elif [ ! -d "$LOGPATH" ]; then
-				errorcode=16
-				print_exitcode
-			fi
+			verify_logpath
 			shift
 			;;
     	--keepjamflog | -k)

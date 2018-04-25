@@ -67,7 +67,7 @@ EXITCODE_HELP_ARRAY=("" # Dummy first line
 "Please use --compname / -c instead" #1
 "Please use --compname / -c instead" #2
 "Please run again without --keepjamflog" #3
-"" #4
+"Try rebuilding your AutoDMG OS image" #4
 "None .... sorry  ¯\_(ツ)_/¯" #5
 "Please try again. If failures continue, you may have an issue with one of your OS image files" #6
 "Please run again with 'sudo'" #7

@@ -34,7 +34,7 @@ PROGRAM="${NAME}.sh"
 AUTHOR="AP Orlebeke"
 VERSION="1.0"
 GITHUB="https://github.com/apizz/Mac_Scripts/HighSierraOSRestore"
-LAST_UPDATE_DATE="4/19/18"
+LAST_UPDATE_DATE="4/24/18"
 
 # Text formatting
 TEXT_NORMAL='\033[0m'

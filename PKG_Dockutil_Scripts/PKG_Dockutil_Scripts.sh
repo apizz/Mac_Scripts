@@ -43,6 +43,11 @@ tell application "SystemUIServer"
   set folderPath to POSIX path of result
 end
 end')
+# Should be updated for each build / year
+VERSION="2019"
+# Cert must be installed in keychain
+CERT="Developer ID Installer: The Masters School (4JKASQ9RJ4)"
+ORG="org.mastersny"
 # For specifiying the file extension of your dockutil scripts
 SCRIPT_FILE_EXT=".sh"
 SCRIPT_LIST=$(ls -1 "$REPO_DIR" | grep $SCRIPT_FILE_EXT)
@@ -122,7 +127,7 @@ chmod_script () {
 }
 
 build_pkg () {
-	pkgbuild --root "${REPO_DIR}""${NAME}" --identifier "${NAME}".pkg "${REPO_DIR}""${NAME}".pkg
+	pkgbuild --root "${REPO_DIR}""${NAME}" --identifier "${ORG}"."${NAME}" --version "$VERSION" --sign "$CERT" "${REPO_DIR}""${NAME}".pkg
 }
 
 build_cleanup () {

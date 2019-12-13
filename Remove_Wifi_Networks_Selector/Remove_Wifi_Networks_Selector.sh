@@ -3,7 +3,7 @@
 # Path to airport executable
 WIFI_EXC="/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
 # Get wifi device for machine (en0, en1, etc.)
-wifiDevice=$($WIFI_EXC prefs | /usr/bin/head -1 | /usr/bin/awk '{print $4}' | /usr/bin/sed 's/\://g')
+wifiDevice=$($WIFI_EXC prefs | /usr/bin/awk '/preferences/{print $NF}' | /usr/bin/sed 's/\://g')
 # Exclude a desired SSID, so for example your users don't have the ability to remove your preconfigured Wifi connection
 ExcludeSSID='YOUR_WIFI_SSID_HERE'
 
